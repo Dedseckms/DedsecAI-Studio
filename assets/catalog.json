@@ -1,0 +1,994 @@
+{
+  "models": [
+    {
+      "id": "hf-04eab67bb3321de7",
+      "name": "Qwen 3 4B Instruct 2507 · Q4_K_M",
+      "family": "Qwen",
+      "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+      "revision": "a06e946bb6b655725eafa393f4a9745d460374c9",
+      "files": [
+        {
+          "name": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+          "remote_path": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+          "size": 2497281120,
+          "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597"
+        }
+      ],
+      "file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+      "size": 2497281120,
+      "alias": "hf-04eab67bb3321de7",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        36,
+        8,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-534927c937059d5d",
+      "name": "Qwen 3 4B Instruct 2507 · Q5_K_M",
+      "family": "Qwen",
+      "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+      "revision": "a06e946bb6b655725eafa393f4a9745d460374c9",
+      "files": [
+        {
+          "name": "Qwen3-4B-Instruct-2507-Q5_K_M.gguf",
+          "remote_path": "Qwen3-4B-Instruct-2507-Q5_K_M.gguf",
+          "size": 2889514080,
+          "sha256": "5bde5e9d883622acb02bf77fe7dcbc56a8b9a9ad4be78a72ca23a532658b4ecb"
+        }
+      ],
+      "file": "Qwen3-4B-Instruct-2507-Q5_K_M.gguf",
+      "size": 2889514080,
+      "alias": "hf-534927c937059d5d",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        36,
+        8,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-f04d64c993ce567b",
+      "name": "Qwen 3 8B · Q4_K_M",
+      "family": "Qwen",
+      "repo": "Qwen/Qwen3-8B-GGUF",
+      "revision": "7c41481f57cb95916b40956ab2f0b139b296d974",
+      "files": [
+        {
+          "name": "Qwen3-8B-Q4_K_M.gguf",
+          "remote_path": "Qwen3-8B-Q4_K_M.gguf",
+          "size": 5027783488,
+          "sha256": "d98cdcbd03e17ce47681435b5150e34c1417f50b5c0019dd560e4882c5745785"
+        }
+      ],
+      "file": "Qwen3-8B-Q4_K_M.gguf",
+      "size": 5027783488,
+      "alias": "hf-f04d64c993ce567b",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/Qwen/Qwen3-8B-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        36,
+        8,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-7e4fdc25be93ab52",
+      "name": "Qwen 3 8B · Q5_K_M",
+      "family": "Qwen",
+      "repo": "Qwen/Qwen3-8B-GGUF",
+      "revision": "7c41481f57cb95916b40956ab2f0b139b296d974",
+      "files": [
+        {
+          "name": "Qwen3-8B-Q5_K_M.gguf",
+          "remote_path": "Qwen3-8B-Q5_K_M.gguf",
+          "size": 5851112224,
+          "sha256": "068bae163faa96ad48032daf4e071a6a28fe67d8dcc95367609c2ff165e52738"
+        }
+      ],
+      "file": "Qwen3-8B-Q5_K_M.gguf",
+      "size": 5851112224,
+      "alias": "hf-7e4fdc25be93ab52",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/Qwen/Qwen3-8B-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        36,
+        8,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-601e17057b79f453",
+      "name": "Qwen 2.5 Coder 7B · Q4_K_M",
+      "family": "Qwen",
+      "repo": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+      "revision": "13fb94bfda8c8cf22497dc57b78f391a9acb426a",
+      "files": [
+        {
+          "name": "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+          "remote_path": "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+          "size": 4683073536,
+          "sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c"
+        }
+      ],
+      "file": "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+      "size": 4683073536,
+      "alias": "hf-601e17057b79f453",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        28,
+        4,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-6eee4fc68d20648a",
+      "name": "Qwen 2.5 Coder 7B · Q5_K_M",
+      "family": "Qwen",
+      "repo": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+      "revision": "13fb94bfda8c8cf22497dc57b78f391a9acb426a",
+      "files": [
+        {
+          "name": "qwen2.5-coder-7b-instruct-q5_k_m.gguf",
+          "remote_path": "qwen2.5-coder-7b-instruct-q5_k_m.gguf",
+          "size": 5444831232,
+          "sha256": "586844eac4d6d6321689f0192c8aa8e69cd8625974a5cc2d925b1a03366e4d16"
+        }
+      ],
+      "file": "qwen2.5-coder-7b-instruct-q5_k_m.gguf",
+      "size": 5444831232,
+      "alias": "hf-6eee4fc68d20648a",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        28,
+        4,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-9fb22e9e38f0abb2",
+      "name": "Qwen 2.5 Coder 14B · Q4_K_M",
+      "family": "Qwen",
+      "repo": "Qwen/Qwen2.5-Coder-14B-Instruct-GGUF",
+      "revision": "d0a692ef765eefbf2fabb130b3cb2e8917e3d225",
+      "files": [
+        {
+          "name": "qwen2.5-coder-14b-instruct-q4_k_m.gguf",
+          "remote_path": "qwen2.5-coder-14b-instruct-q4_k_m.gguf",
+          "size": 8988110272,
+          "sha256": "c1e659736d89ac1065fb495330fb824d94001974a4bfa78e7270e43476a8d940"
+        }
+      ],
+      "file": "qwen2.5-coder-14b-instruct-q4_k_m.gguf",
+      "size": 8988110272,
+      "alias": "hf-9fb22e9e38f0abb2",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        48,
+        8,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-c4019bfc59c96d22",
+      "name": "Qwen 3 Coder 30B A3B · Q4_K_M",
+      "family": "Qwen",
+      "repo": "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF",
+      "revision": "b17cb02dd882d5b6ab62fc777ad2995f19668350",
+      "files": [
+        {
+          "name": "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+          "remote_path": "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+          "size": 18556689568,
+          "sha256": "fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad"
+        }
+      ],
+      "file": "Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+      "size": 18556689568,
+      "alias": "hf-c4019bfc59c96d22",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-20de5fa7fe273d84",
+      "name": "Qwen 3 Coder 30B A3B · UD-IQ2_XXS",
+      "family": "Qwen",
+      "repo": "unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF",
+      "revision": "b17cb02dd882d5b6ab62fc777ad2995f19668350",
+      "files": [
+        {
+          "name": "Qwen3-Coder-30B-A3B-Instruct-UD-IQ2_XXS.gguf",
+          "remote_path": "Qwen3-Coder-30B-A3B-Instruct-UD-IQ2_XXS.gguf",
+          "size": 10333691040,
+          "sha256": "51d0a284dc26f11102032b7aa8eca28619b8c399478afc5a0ab7180cd711bf13"
+        }
+      ],
+      "file": "Qwen3-Coder-30B-A3B-Instruct-UD-IQ2_XXS.gguf",
+      "size": 10333691040,
+      "alias": "hf-20de5fa7fe273d84",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-77c76385aaa7d3b1",
+      "name": "Qwen 3 0.6B · Q8_0",
+      "family": "Qwen",
+      "repo": "Qwen/Qwen3-0.6B-GGUF",
+      "revision": "23749fefcc72300e3a2ad315e1317431b06b590a",
+      "files": [
+        {
+          "name": "Qwen3-0.6B-Q8_0.gguf",
+          "remote_path": "Qwen3-0.6B-Q8_0.gguf",
+          "size": 639446688,
+          "sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+        }
+      ],
+      "file": "Qwen3-0.6B-Q8_0.gguf",
+      "size": 639446688,
+      "alias": "hf-77c76385aaa7d3b1",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/Qwen/Qwen3-0.6B-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-493e910223039b74",
+      "name": "Qwen 3 1.7B · Q8_0",
+      "family": "Qwen",
+      "repo": "Qwen/Qwen3-1.7B-GGUF",
+      "revision": "90862c4b9d2787eaed51d12237eafdfe7c5f6077",
+      "files": [
+        {
+          "name": "Qwen3-1.7B-Q8_0.gguf",
+          "remote_path": "Qwen3-1.7B-Q8_0.gguf",
+          "size": 1834426016,
+          "sha256": "061b54daade076b5d3362dac252678d17da8c68f07560be70818cace6590cb1a"
+        }
+      ],
+      "file": "Qwen3-1.7B-Q8_0.gguf",
+      "size": 1834426016,
+      "alias": "hf-493e910223039b74",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/Qwen/Qwen3-1.7B-GGUF",
+      "tasks": "Модель семейства Qwen. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-14e7eb92cbe7293f",
+      "name": "DeepSeek R1 Distill 1.5B · Q4_K_M",
+      "family": "DeepSeek",
+      "repo": "unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
+      "revision": "3cb4d15544a2a5e07439592b9a0965b6445fbd34",
+      "files": [
+        {
+          "name": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+          "remote_path": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+          "size": 1117321312,
+          "sha256": "f3bdf9cf31dee4b57ae4e455a1cb0d01b5c2c1b50d72d3112141c195506c2840"
+        }
+      ],
+      "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+      "size": 1117321312,
+      "alias": "hf-14e7eb92cbe7293f",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
+      "tasks": "Модель семейства DeepSeek. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        28,
+        2,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-2f73ad6ed3a57ab2",
+      "name": "DeepSeek R1 Distill 1.5B · Q5_K_M",
+      "family": "DeepSeek",
+      "repo": "unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
+      "revision": "3cb4d15544a2a5e07439592b9a0965b6445fbd34",
+      "files": [
+        {
+          "name": "DeepSeek-R1-Distill-Qwen-1.5B-Q5_K_M.gguf",
+          "remote_path": "DeepSeek-R1-Distill-Qwen-1.5B-Q5_K_M.gguf",
+          "size": 1285494880,
+          "sha256": "5190cb74aef330f7d4cf6a6a06553248b0c5bf1054a455184bbe58c03437ba37"
+        }
+      ],
+      "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q5_K_M.gguf",
+      "size": 1285494880,
+      "alias": "hf-2f73ad6ed3a57ab2",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
+      "tasks": "Модель семейства DeepSeek. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        28,
+        2,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-be9d1f8619a9664e",
+      "name": "DeepSeek R1 Distill 7B · Q4_K_M",
+      "family": "DeepSeek",
+      "repo": "unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF",
+      "revision": "097680e4eed7a83b3df6b0bb5e5134099cadf1b0",
+      "files": [
+        {
+          "name": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf",
+          "remote_path": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf",
+          "size": 4683073248,
+          "sha256": "78272d8d32084548bd450394a560eb2d70de8232ab96a725769b1f9171235c1c"
+        }
+      ],
+      "file": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf",
+      "size": 4683073248,
+      "alias": "hf-be9d1f8619a9664e",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF",
+      "tasks": "Модель семейства DeepSeek. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        28,
+        4,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-51a48da3d62dcbef",
+      "name": "DeepSeek R1 0528 · 8B · Q4_K_M",
+      "family": "DeepSeek",
+      "repo": "unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF",
+      "revision": "eb48357c179d34dbf515983f798dfb8752a0f261",
+      "files": [
+        {
+          "name": "DeepSeek-R1-0528-Qwen3-8B-Q4_K_M.gguf",
+          "remote_path": "DeepSeek-R1-0528-Qwen3-8B-Q4_K_M.gguf",
+          "size": 5027785216,
+          "sha256": "a86349a4180c4e6bb43f874c29c404fa2be3f90b15509bd6d86f697dba724ec1"
+        }
+      ],
+      "file": "DeepSeek-R1-0528-Qwen3-8B-Q4_K_M.gguf",
+      "size": 5027785216,
+      "alias": "hf-51a48da3d62dcbef",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF",
+      "tasks": "Модель семейства DeepSeek. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        36,
+        8,
+        128
+      ],
+      "license": "mit"
+    },
+    {
+      "id": "hf-67d3b6e7d2d45652",
+      "name": "DeepSeek R1 0528 · 8B · Q5_K_M",
+      "family": "DeepSeek",
+      "repo": "unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF",
+      "revision": "eb48357c179d34dbf515983f798dfb8752a0f261",
+      "files": [
+        {
+          "name": "DeepSeek-R1-0528-Qwen3-8B-Q5_K_M.gguf",
+          "remote_path": "DeepSeek-R1-0528-Qwen3-8B-Q5_K_M.gguf",
+          "size": 5851113984,
+          "sha256": "044519a2d9821f9a91fbc8bda4eb2333180842bf56845d130e71144c11a1140e"
+        }
+      ],
+      "file": "DeepSeek-R1-0528-Qwen3-8B-Q5_K_M.gguf",
+      "size": 5851113984,
+      "alias": "hf-67d3b6e7d2d45652",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF",
+      "tasks": "Модель семейства DeepSeek. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        36,
+        8,
+        128
+      ],
+      "license": "mit"
+    },
+    {
+      "id": "hf-8ed780cf2f051da7",
+      "name": "DeepSeek R1 Distill 14B · Q4_K_M",
+      "family": "DeepSeek",
+      "repo": "unsloth/DeepSeek-R1-Distill-Qwen-14B-GGUF",
+      "revision": "7b05b58b41f623e66fc74cd27b35475267b2f3e3",
+      "files": [
+        {
+          "name": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
+          "remote_path": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
+          "size": 8988109984,
+          "sha256": "67a7933cf2ad596a393c8e13b30bc4da2d50b283e250b78554aed18817eca31c"
+        }
+      ],
+      "file": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
+      "size": 8988109984,
+      "alias": "hf-8ed780cf2f051da7",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-14B-GGUF",
+      "tasks": "Модель семейства DeepSeek. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "geometry": [
+        48,
+        8,
+        128
+      ],
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-de08d0de9ad2e4a4",
+      "name": "DeepSeek R1 Distill 32B · Q4_K_M",
+      "family": "DeepSeek",
+      "repo": "unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF",
+      "revision": "1938d05cc893a60f37be1dc16e7465038f4fca63",
+      "files": [
+        {
+          "name": "DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf",
+          "remote_path": "DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf",
+          "size": 19851335584,
+          "sha256": "ca171ca03554ee20cf67ad6b540610ae7eabb95af00c0abd36bb73542e140fb5"
+        }
+      ],
+      "file": "DeepSeek-R1-Distill-Qwen-32B-Q4_K_M.gguf",
+      "size": 19851335584,
+      "alias": "hf-de08d0de9ad2e4a4",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF",
+      "tasks": "Модель семейства DeepSeek. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-b5e1886a5636717b",
+      "name": "GLM 4.7 Flash · Q4_K_M",
+      "family": "GLM",
+      "repo": "unsloth/GLM-4.7-Flash-GGUF",
+      "revision": "0d32489ecb9db6d2a4fc93bd27ef01519f95474d",
+      "files": [
+        {
+          "name": "GLM-4.7-Flash-Q4_K_M.gguf",
+          "remote_path": "GLM-4.7-Flash-Q4_K_M.gguf",
+          "size": 18312339808,
+          "sha256": "29837ed2c0fc5f51981adf8ac8083fcf80743c598381f13e9f06cbad0498b174"
+        }
+      ],
+      "file": "GLM-4.7-Flash-Q4_K_M.gguf",
+      "size": 18312339808,
+      "alias": "hf-b5e1886a5636717b",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF",
+      "tasks": "Модель семейства GLM. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "mit"
+    },
+    {
+      "id": "hf-f9d3b713f0d18c50",
+      "name": "GLM 4.7 Flash · UD-IQ1_S",
+      "family": "GLM",
+      "repo": "unsloth/GLM-4.7-Flash-GGUF",
+      "revision": "0d32489ecb9db6d2a4fc93bd27ef01519f95474d",
+      "files": [
+        {
+          "name": "GLM-4.7-Flash-UD-IQ1_S.gguf",
+          "remote_path": "GLM-4.7-Flash-UD-IQ1_S.gguf",
+          "size": 9247983968,
+          "sha256": "234e0149f81b181bf52ca3998386604965bb6062985e8e8ba7e77785cb6aade6"
+        }
+      ],
+      "file": "GLM-4.7-Flash-UD-IQ1_S.gguf",
+      "size": 9247983968,
+      "alias": "hf-f9d3b713f0d18c50",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF",
+      "tasks": "Модель семейства GLM. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "mit"
+    },
+    {
+      "id": "hf-05a0a9a7faac0a10",
+      "name": "GLM 4.7 Flash · UD-IQ2_XXS",
+      "family": "GLM",
+      "repo": "unsloth/GLM-4.7-Flash-GGUF",
+      "revision": "0d32489ecb9db6d2a4fc93bd27ef01519f95474d",
+      "files": [
+        {
+          "name": "GLM-4.7-Flash-UD-IQ2_XXS.gguf",
+          "remote_path": "GLM-4.7-Flash-UD-IQ2_XXS.gguf",
+          "size": 10513625440,
+          "sha256": "d927162886f337ef4e1ddbeb6de1aac2872981629291d3b2444da9e6a1205166"
+        }
+      ],
+      "file": "GLM-4.7-Flash-UD-IQ2_XXS.gguf",
+      "size": 10513625440,
+      "alias": "hf-05a0a9a7faac0a10",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/GLM-4.7-Flash-GGUF",
+      "tasks": "Модель семейства GLM. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "mit"
+    },
+    {
+      "id": "hf-addf99bf448b180e",
+      "name": "Kimi K2 Instruct · UD-IQ1_S",
+      "family": "Kimi",
+      "repo": "unsloth/Kimi-K2-Instruct-GGUF",
+      "revision": "23bf90d8196ddfcb3328a6f60c99a9bdb5c1dadf",
+      "files": [
+        {
+          "name": "Kimi-K2-Instruct-UD-IQ1_S-00001-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Instruct-UD-IQ1_S-00001-of-00006.gguf",
+          "size": 49281455520,
+          "sha256": "e4d4fbdc4008b01d41fc02370742116849818ee7b7c6bb51dea334cc87c1d32f"
+        },
+        {
+          "name": "Kimi-K2-Instruct-UD-IQ1_S-00002-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Instruct-UD-IQ1_S-00002-of-00006.gguf",
+          "size": 48941558720,
+          "sha256": "42171eab72ca6079e62dd78fc0f6eb58d48f95c985ca1965b83cdc440322ff46"
+        },
+        {
+          "name": "Kimi-K2-Instruct-UD-IQ1_S-00003-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Instruct-UD-IQ1_S-00003-of-00006.gguf",
+          "size": 48493529792,
+          "sha256": "4a9b4a37eeb6cbd0ac80b72c3691a3c74924d7e1729294920d95135d948094b6"
+        },
+        {
+          "name": "Kimi-K2-Instruct-UD-IQ1_S-00004-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Instruct-UD-IQ1_S-00004-of-00006.gguf",
+          "size": 49069263712,
+          "sha256": "312249ca1f6eba54f0984bfc088b1ca494f84730f3adbcfce1c4537077cd29d5"
+        },
+        {
+          "name": "Kimi-K2-Instruct-UD-IQ1_S-00005-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Instruct-UD-IQ1_S-00005-of-00006.gguf",
+          "size": 49397385408,
+          "sha256": "85294dabb78e66762482929c7f469fa806048925c588c3d03181311e6fa3e6cc"
+        },
+        {
+          "name": "Kimi-K2-Instruct-UD-IQ1_S-00006-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Instruct-UD-IQ1_S-00006-of-00006.gguf",
+          "size": 34930410368,
+          "sha256": "c7e446ed3e343d691dc008c1710c4400a6ac398064f6171e7d1a4c3912a49540"
+        }
+      ],
+      "file": "Kimi-K2-Instruct-UD-IQ1_S-00001-of-00006.gguf",
+      "size": 280113603520,
+      "alias": "hf-addf99bf448b180e",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/Kimi-K2-Instruct-GGUF",
+      "tasks": "Модель семейства Kimi. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "other"
+    },
+    {
+      "id": "hf-4de3395a3ce8f204",
+      "name": "Kimi K2 Instruct · Q4_K_M",
+      "family": "Kimi",
+      "repo": "unsloth/Kimi-K2-Instruct-GGUF",
+      "revision": "23bf90d8196ddfcb3328a6f60c99a9bdb5c1dadf",
+      "files": [
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00001-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00001-of-00013.gguf",
+          "size": 46277069344,
+          "sha256": "ff41936f7e6043934f9c2ac1748a00533ff2be95f747a4ef603ec92b935a22b7"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00002-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00002-of-00013.gguf",
+          "size": 49179106304,
+          "sha256": "aaaa02c3e79a075a42d703c384025457c0e44866091cd97c1de68cf473d51fb7"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00003-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00003-of-00013.gguf",
+          "size": 49505150304,
+          "sha256": "3a76cfd4c37b124dc9ef647e34876f43c01595f96bf60a116d3d492d57130069"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00004-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00004-of-00013.gguf",
+          "size": 47772070976,
+          "sha256": "d14ace9e892308fb35b67c6acae705b53b2bf49d77803f655c63f6cbac0d0967"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00005-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00005-of-00013.gguf",
+          "size": 46325998784,
+          "sha256": "457ad2e0647b0c39a3f618138df6a19f00b1a8ef7d79be07b74b8847a593e264"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00006-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00006-of-00013.gguf",
+          "size": 47721995360,
+          "sha256": "fa2ebe991a3479e5bbafdef396eaafbba44f017557a67d3e395953dffd424f93"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00007-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00007-of-00013.gguf",
+          "size": 47772070976,
+          "sha256": "c363718f2001eb8da71bda89bf16d0735d8299d825ba9e365bccb18e46aaca77"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00008-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00008-of-00013.gguf",
+          "size": 49505150304,
+          "sha256": "2ab9664b227dbc228539bbe8c31f7c984d2f6bf4b06a091c69ae287770bdf3c1"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00009-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00009-of-00013.gguf",
+          "size": 47783109824,
+          "sha256": "3781496e9eace0aa8da8ac312c70349a2ac415f92e25adc017c5de74c6bfc8f5"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00010-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00010-of-00013.gguf",
+          "size": 49505150304,
+          "sha256": "e0c2c56c898ee7072a8ba207d9827ff85573ebe9eebafb9ab9f67cd6478c9fb6"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00011-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00011-of-00013.gguf",
+          "size": 47721995360,
+          "sha256": "4cf84316ddc630d4b0550da851dc20e691167918dbde07d1ff6679f4ffa27e08"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00012-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00012-of-00013.gguf",
+          "size": 47507141568,
+          "sha256": "b1679efc66126b7cdecf6a746c2be032bb15a2d960bc43d504aae665f92982ed"
+        },
+        {
+          "name": "Kimi-K2-Instruct-Q4_K_M-00013-of-00013.gguf",
+          "remote_path": "Q4_K_M/Kimi-K2-Instruct-Q4_K_M-00013-of-00013.gguf",
+          "size": 44205761120,
+          "sha256": "386318edacaf1c2581a31b78a3258e1809129ace5cdce92ff93fd41c3e5676a9"
+        }
+      ],
+      "file": "Kimi-K2-Instruct-Q4_K_M-00001-of-00013.gguf",
+      "size": 620781770528,
+      "alias": "hf-4de3395a3ce8f204",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/Kimi-K2-Instruct-GGUF",
+      "tasks": "Модель семейства Kimi. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "other"
+    },
+    {
+      "id": "hf-58cf68b8f261f012",
+      "name": "Kimi K2 Thinking · UD-IQ1_S",
+      "family": "Kimi",
+      "repo": "unsloth/Kimi-K2-Thinking-GGUF",
+      "revision": "7e4f5d413a9bb469174b2cc9e47d457d16bc6702",
+      "files": [
+        {
+          "name": "Kimi-K2-Thinking-UD-IQ1_S-00001-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Thinking-UD-IQ1_S-00001-of-00006.gguf",
+          "size": 48513350112,
+          "sha256": "8bf7aea3bfa095e7ead76093836fe254dfa06262e116eb8c6ce83a98b5d44169"
+        },
+        {
+          "name": "Kimi-K2-Thinking-UD-IQ1_S-00002-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Thinking-UD-IQ1_S-00002-of-00006.gguf",
+          "size": 49574496960,
+          "sha256": "b3ad9cfd516228e4ba485dc1c21f3aeb1dedb51b7d5b0ee97944b0a5da862ebe"
+        },
+        {
+          "name": "Kimi-K2-Thinking-UD-IQ1_S-00003-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Thinking-UD-IQ1_S-00003-of-00006.gguf",
+          "size": 49184372160,
+          "sha256": "d71c69b688ea7aa56cc5f7e4c3b72c28345af62eea70d52d94761fa62d141af7"
+        },
+        {
+          "name": "Kimi-K2-Thinking-UD-IQ1_S-00004-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Thinking-UD-IQ1_S-00004-of-00006.gguf",
+          "size": 49208213344,
+          "sha256": "c95318d9d152fe0af0b3620e6d894fcba766d57a970d19932bc788369298b4e0"
+        },
+        {
+          "name": "Kimi-K2-Thinking-UD-IQ1_S-00005-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Thinking-UD-IQ1_S-00005-of-00006.gguf",
+          "size": 48920088000,
+          "sha256": "38ee05c71b7d14210cc1abda4f481fb9ec12b625459005028822570e936b8317"
+        },
+        {
+          "name": "Kimi-K2-Thinking-UD-IQ1_S-00006-of-00006.gguf",
+          "remote_path": "UD-IQ1_S/Kimi-K2-Thinking-UD-IQ1_S-00006-of-00006.gguf",
+          "size": 39938740736,
+          "sha256": "93968fb93a98d5dc3603c93770f244f8718686bc7057cec8175d6be29aaa59d1"
+        }
+      ],
+      "file": "Kimi-K2-Thinking-UD-IQ1_S-00001-of-00006.gguf",
+      "size": 285339261312,
+      "alias": "hf-58cf68b8f261f012",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/Kimi-K2-Thinking-GGUF",
+      "tasks": "Модель семейства Kimi. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "other"
+    },
+    {
+      "id": "hf-ddeaac8e58b8fc33",
+      "name": "Phi 4 Mini Instruct · Q4_K_M",
+      "family": "Phi",
+      "repo": "bartowski/microsoft_Phi-4-mini-instruct-GGUF",
+      "revision": "7ff82c2aaa4dde30121698a973765f39be5288c0",
+      "files": [
+        {
+          "name": "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+          "remote_path": "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+          "size": 2491874688,
+          "sha256": "01999f17c39cc3074afae5e9c539bc82d45f2dd7faa3917c66cbef76fce8c0c2"
+        }
+      ],
+      "file": "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+      "size": 2491874688,
+      "alias": "hf-ddeaac8e58b8fc33",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/microsoft_Phi-4-mini-instruct-GGUF",
+      "tasks": "Модель семейства Phi. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "уточните в карточке модели"
+    },
+    {
+      "id": "hf-d6d94b572b2838b7",
+      "name": "Phi 4 Mini Instruct · Q5_K_M",
+      "family": "Phi",
+      "repo": "bartowski/microsoft_Phi-4-mini-instruct-GGUF",
+      "revision": "7ff82c2aaa4dde30121698a973765f39be5288c0",
+      "files": [
+        {
+          "name": "microsoft_Phi-4-mini-instruct-Q5_K_M.gguf",
+          "remote_path": "microsoft_Phi-4-mini-instruct-Q5_K_M.gguf",
+          "size": 2848128384,
+          "sha256": "840ad85cff01e41701e2b2a3826016916f8e51242c8f25d62e59fa7eb93acbc5"
+        }
+      ],
+      "file": "microsoft_Phi-4-mini-instruct-Q5_K_M.gguf",
+      "size": 2848128384,
+      "alias": "hf-d6d94b572b2838b7",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/microsoft_Phi-4-mini-instruct-GGUF",
+      "tasks": "Модель семейства Phi. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "уточните в карточке модели"
+    },
+    {
+      "id": "hf-90663b51fd6294db",
+      "name": "Mistral 7B Instruct v0.3 · Q4_K_M",
+      "family": "Mistral",
+      "repo": "bartowski/Mistral-7B-Instruct-v0.3-GGUF",
+      "revision": "61fd4167fff3ab01ee1cfe0da183fa27a944db48",
+      "files": [
+        {
+          "name": "Mistral-7B-Instruct-v0.3-Q4_K_M.gguf",
+          "remote_path": "Mistral-7B-Instruct-v0.3-Q4_K_M.gguf",
+          "size": 4372812000,
+          "sha256": "1270d22c0fbb3d092fb725d4d96c457b7b687a5f5a715abe1e818da303e562b6"
+        }
+      ],
+      "file": "Mistral-7B-Instruct-v0.3-Q4_K_M.gguf",
+      "size": 4372812000,
+      "alias": "hf-90663b51fd6294db",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.3-GGUF",
+      "tasks": "Модель семейства Mistral. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-205045fbbe8ab007",
+      "name": "Mistral 7B Instruct v0.3 · Q5_K_M",
+      "family": "Mistral",
+      "repo": "bartowski/Mistral-7B-Instruct-v0.3-GGUF",
+      "revision": "61fd4167fff3ab01ee1cfe0da183fa27a944db48",
+      "files": [
+        {
+          "name": "Mistral-7B-Instruct-v0.3-Q5_K_M.gguf",
+          "remote_path": "Mistral-7B-Instruct-v0.3-Q5_K_M.gguf",
+          "size": 5136175328,
+          "sha256": "0374072546aaf1257d1e34610edb11b691730d8ef7d44b5629693a2dd8e8d472"
+        }
+      ],
+      "file": "Mistral-7B-Instruct-v0.3-Q5_K_M.gguf",
+      "size": 5136175328,
+      "alias": "hf-205045fbbe8ab007",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.3-GGUF",
+      "tasks": "Модель семейства Mistral. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-7933557ec7286fe8",
+      "name": "Mistral Nemo 12B · Q4_K_M",
+      "family": "Mistral",
+      "repo": "bartowski/Mistral-Nemo-Instruct-2407-GGUF",
+      "revision": "a2dd64a0a76ea1bdb2bb6ab6fa5496b003c7c908",
+      "files": [
+        {
+          "name": "Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+          "remote_path": "Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+          "size": 7477208192,
+          "sha256": "7c1a10d202d8788dbe5628dc962254d10654c853cae6aaeca0618f05490d4a46"
+        }
+      ],
+      "file": "Mistral-Nemo-Instruct-2407-Q4_K_M.gguf",
+      "size": 7477208192,
+      "alias": "hf-7933557ec7286fe8",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/Mistral-Nemo-Instruct-2407-GGUF",
+      "tasks": "Модель семейства Mistral. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "hf-ba617b91b450346c",
+      "name": "Gemma 3 4B IT · текст · Q4_K_M",
+      "family": "Gemma",
+      "repo": "unsloth/gemma-3-4b-it-GGUF",
+      "revision": "5a3566e716d80f709ed7b79817eaf7733d2a1fce",
+      "files": [
+        {
+          "name": "gemma-3-4b-it-Q4_K_M.gguf",
+          "remote_path": "gemma-3-4b-it-Q4_K_M.gguf",
+          "size": 2489894016,
+          "sha256": "04a43a22e8d2003deda5acc262f68ec1005fa76c735a9962a8c77042a74a7d19"
+        }
+      ],
+      "file": "gemma-3-4b-it-Q4_K_M.gguf",
+      "size": 2489894016,
+      "alias": "hf-ba617b91b450346c",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF",
+      "tasks": "Модель семейства Gemma. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "gemma"
+    },
+    {
+      "id": "hf-bbd3f8dde3d6e9b6",
+      "name": "Gemma 3 4B IT · текст · Q5_K_M",
+      "family": "Gemma",
+      "repo": "unsloth/gemma-3-4b-it-GGUF",
+      "revision": "5a3566e716d80f709ed7b79817eaf7733d2a1fce",
+      "files": [
+        {
+          "name": "gemma-3-4b-it-Q5_K_M.gguf",
+          "remote_path": "gemma-3-4b-it-Q5_K_M.gguf",
+          "size": 2829698176,
+          "sha256": "974e5c2f13c321fc3258b6fbf2ce326a09d8ace511aa6846df1db62baf7df7d4"
+        }
+      ],
+      "file": "gemma-3-4b-it-Q5_K_M.gguf",
+      "size": 2829698176,
+      "alias": "hf-bbd3f8dde3d6e9b6",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF",
+      "tasks": "Модель семейства Gemma. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "gemma"
+    },
+    {
+      "id": "hf-b245e66131a0555d",
+      "name": "Gemma 3 12B IT · текст · Q4_K_M",
+      "family": "Gemma",
+      "repo": "unsloth/gemma-3-12b-it-GGUF",
+      "revision": "d15e4c7dc21dc55d56bf8549db57a71ad8a2a35d",
+      "files": [
+        {
+          "name": "gemma-3-12b-it-Q4_K_M.gguf",
+          "remote_path": "gemma-3-12b-it-Q4_K_M.gguf",
+          "size": 7300778336,
+          "sha256": "15b8fd9d8672cd4240c178c217ca781409291f34e353d2e913b29c7602ceb3ff"
+        }
+      ],
+      "file": "gemma-3-12b-it-Q4_K_M.gguf",
+      "size": 7300778336,
+      "alias": "hf-b245e66131a0555d",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/unsloth/gemma-3-12b-it-GGUF",
+      "tasks": "Модель семейства Gemma. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "gemma"
+    },
+    {
+      "id": "hf-d5350673aa8a2f25",
+      "name": "Llama 3.2 1B Instruct · Q4_K_M",
+      "family": "Llama",
+      "repo": "bartowski/Llama-3.2-1B-Instruct-GGUF",
+      "revision": "067b946cf014b7c697f3654f621d577a3e3afd1c",
+      "files": [
+        {
+          "name": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+          "remote_path": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+          "size": 807694464,
+          "sha256": "6f85a640a97cf2bf5b8e764087b1e83da0fdb51d7c9fab7d0fece9385611df83"
+        }
+      ],
+      "file": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+      "size": 807694464,
+      "alias": "hf-d5350673aa8a2f25",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF",
+      "tasks": "Модель семейства Llama. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "llama3.2"
+    },
+    {
+      "id": "hf-0792d1c4677ac60e",
+      "name": "Llama 3.2 1B Instruct · Q8_0",
+      "family": "Llama",
+      "repo": "bartowski/Llama-3.2-1B-Instruct-GGUF",
+      "revision": "067b946cf014b7c697f3654f621d577a3e3afd1c",
+      "files": [
+        {
+          "name": "Llama-3.2-1B-Instruct-Q8_0.gguf",
+          "remote_path": "Llama-3.2-1B-Instruct-Q8_0.gguf",
+          "size": 1321083008,
+          "sha256": "432f310a77f4650a88d0fd59ecdd7cebed8d684bafea53cbff0473542964f0c3"
+        }
+      ],
+      "file": "Llama-3.2-1B-Instruct-Q8_0.gguf",
+      "size": 1321083008,
+      "alias": "hf-0792d1c4677ac60e",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF",
+      "tasks": "Модель семейства Llama. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "llama3.2"
+    },
+    {
+      "id": "hf-90947d0b4fb8d600",
+      "name": "Llama 3.2 3B Instruct · Q4_K_M",
+      "family": "Llama",
+      "repo": "bartowski/Llama-3.2-3B-Instruct-GGUF",
+      "revision": "5ab33fa94d1d04e903623ae72c95d1696f09f9e8",
+      "files": [
+        {
+          "name": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+          "remote_path": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+          "size": 2019377696,
+          "sha256": "6c1a2b41161032677be168d354123594c0e6e67d2b9227c84f296ad037c728ff"
+        }
+      ],
+      "file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+      "size": 2019377696,
+      "alias": "hf-90947d0b4fb8d600",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF",
+      "tasks": "Модель семейства Llama. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "llama3.2"
+    },
+    {
+      "id": "hf-5f12e2c906d376ab",
+      "name": "Llama 3.2 3B Instruct · Q5_K_M",
+      "family": "Llama",
+      "repo": "bartowski/Llama-3.2-3B-Instruct-GGUF",
+      "revision": "5ab33fa94d1d04e903623ae72c95d1696f09f9e8",
+      "files": [
+        {
+          "name": "Llama-3.2-3B-Instruct-Q5_K_M.gguf",
+          "remote_path": "Llama-3.2-3B-Instruct-Q5_K_M.gguf",
+          "size": 2322154016,
+          "sha256": "0b94ccd04d908304cec5246a3d942b64417a423bc5c6d47c73bc557e590b5194"
+        }
+      ],
+      "file": "Llama-3.2-3B-Instruct-Q5_K_M.gguf",
+      "size": 2322154016,
+      "alias": "hf-5f12e2c906d376ab",
+      "native_ctx": 32768,
+      "source": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF",
+      "tasks": "Модель семейства Llama. Совместимость инструментов и качество нужно проверить на ваших задачах.",
+      "license": "llama3.2"
+    }
+  ],
+  "metadata_only": true
+}
