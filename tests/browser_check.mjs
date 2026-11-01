@@ -14,7 +14,7 @@ try {
   async function evaluate(expression){const result=await call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));return result.result.value;}
   await call('Page.enable');await call('Runtime.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
-  await call('Page.navigate',{url:'http://127.0.0.1:1240/#library'});
+  await call('Page.navigate',{url:(process.env.STUDIO_URL||'http://127.0.0.1:1240')+'/#library'});
   for(let i=0;i<100;i++){if(await evaluate("document.querySelectorAll('.model-card').length>=36"))break;await new Promise(r=>setTimeout(r,100));}
   if(!await evaluate("document.title.includes('DedsecAI Studio')"))throw Error('Branding missing');
   if(!await evaluate("document.querySelectorAll('.model-card').length>=36"))throw Error('Catalog missing');

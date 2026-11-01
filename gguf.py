@@ -3,12 +3,13 @@ import struct
 def gguf_info(path):
     """Read scalar GGUF metadata, skip arrays without loading model weights."""
     formats = {0:'B', 1:'b', 2:'H', 3:'h', 4:'I', 5:'i', 6:'f', 7:'?', 10:'Q', 11:'q', 12:'d'}
+    file_size=path.stat().st_size
     with path.open('rb') as src:
         def unpack(fmt):
             return struct.unpack('<'+fmt, src.read(struct.calcsize('<'+fmt)))[0]
         def string(keep=True):
             length = unpack('Q')
-            if length > path.stat().st_size:
+            if length > file_size:
                 raise ValueError('Повреждённая строка GGUF')
             if keep:
                 if length > 1024*1024:
@@ -44,7 +45,7 @@ def gguf_info(path):
             val = value(typ, keep)
             if keep and val is not None:
                 result[key] = val
-        if src.tell() > path.stat().st_size:
+        if src.tell() > file_size:
             raise ValueError('Обрезанный GGUF')
         return result
 

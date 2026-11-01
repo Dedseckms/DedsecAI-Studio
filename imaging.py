@@ -139,6 +139,7 @@ def run(action,data):
     if action=='image_load':
         payload={'recipe':data.get('recipe'),'models':data.get('models',{})}
         result=api('/sdcpp/v1/models/load',payload,timeout=240)
+        if result.get('state')!='ready':raise ValueError('Image-модель не загрузилась: '+str(result.get('error') or result.get('state')))
         # A real short generation measures the newly loaded image model automatically.
         try:
             measured=generate({'prompt':'a small green cube on a black background','size':'512x512'},benchmark=True)
