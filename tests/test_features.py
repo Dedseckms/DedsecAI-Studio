@@ -71,6 +71,14 @@ class ProfileTests(unittest.TestCase):
    write_json(Path(d)/'profiles.json',{'a':{'ctx':65536}})
    self.assertEqual(manager.model('a')['ctx'],65536)
    self.assertTrue(manager.model('a')['custom_ctx'])
+ def test_large_context_keeps_more_than_32_messages(self):
+  class FakeManager:
+   api=staticmethod(lambda path,*a,**k: {'prompt':'history'} if path=='/apply-template' else {'tokens':list(range(100))})
+  rows=[{'id':i,'role':'user' if i%2==0 else 'assistant','content':'Long conversation message '+str(i),'status':'done'} for i in range(70)]
+  engine=companion.ChatEngine(FakeManager())
+  with patch.object(companion,'overview',return_value={'messages':rows}),patch.object(companion,'search',return_value=[]),patch.object(companion,'memories',return_value=[]):
+   messages,sources,output=engine.context({'conversation':'test','text':'continue'},{'id':'test','ctx':65536})
+  self.assertEqual(len(messages),71);self.assertEqual(output,4096)
  def test_native_context_limit_rejected(self):
   with patch.object(manager,'model',return_value={'native_ctx':8192}):
    for value in [True,8193,0,'4096']:
