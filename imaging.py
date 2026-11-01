@@ -14,7 +14,7 @@ import time
 import urllib.error
 import urllib.request
 import urllib.parse
-from common import APP_HOME,CONFIG,STATE,ROOT,read_json,write_json
+from common import APP_HOME,CONFIG,STATE,ROOT,read_json,write_json,named_lock
 import bootstrap
 
 PORT=int(os.environ.get('DEDSECAI_IMAGE_PORT','1237'))
@@ -77,6 +77,8 @@ def stop():
         except (ProcessLookupError,FileNotFoundError):pass
 
 def start():
+    import runtime
+    runtime.stop()
     try:api('/sdcpp/v1/recipes');return {'message':'Image-сервер готов.'}
     except (OSError,ValueError):pass
     exe=binary()
@@ -98,7 +100,7 @@ def start():
     raise ValueError('Image-сервер не ответил за 30 секунд.')
 
 def state():
-    result={'installed':bool(binary()),'running':False,'model_dir':str(MODEL_DIR),'gallery':read_json(STATE/'gallery.json',[]),'library':library()}
+    result={'installed':bool(binary()),'running':False,'model_dir':str(MODEL_DIR),'gallery':read_json(STATE/'gallery.json',[]),'trash':gallery_trash(),'library':library()}
     try:
         result.update(running=True,recipes=api('/sdcpp/v1/recipes'),files=api('/sdcpp/v1/model-files'),model=api('/sdcpp/v1/models/status'))
     except (OSError,ValueError):result['running']=False
@@ -110,7 +112,9 @@ def download(data):
     if not re.fullmatch(r'[\w. -]{1,180}\.(?:gguf|safetensors|ckpt)',name,re.I):raise ValueError('Нужна прямая ссылка на GGUF, safetensors или ckpt.')
     category=data.get('category','checkpoints')
     if category not in {'checkpoints','diffusion_models','text_encoders','vae','loras'}:raise ValueError('Неизвестная категория весов.')
-    dest=MODEL_DIR/category/name;dest.parent.mkdir(parents=True,exist_ok=True)
+    folder=data.get('folder','')
+    if folder and (not isinstance(folder,str) or not re.fullmatch('[a-f0-9]{12}',folder)):raise ValueError('Некорректная папка загрузки.')
+    dest=MODEL_DIR/category/folder/name;dest.parent.mkdir(parents=True,exist_ok=True)
     expected=data.get('sha256') or None
     if expected and not re.fullmatch('[a-fA-F0-9]{64}',expected):raise ValueError('Неверный SHA-256.')
     if dest.exists():
@@ -164,6 +168,10 @@ def run(action,data):
         print('Загружаем модель и совместимые компоненты: '+str(payload['recipe']),flush=True)
         result=api('/sdcpp/v1/models/load',payload,timeout=240)
         if result.get('state')!='ready':raise ValueError('Image-модель не загрузилась: '+str(result.get('error') or result.get('state')))
+        previous=read_json(CONFIG/'image-selected.json',{})
+        saved={'recipe':payload['recipe'],'models':payload['models']}
+        if previous.get('models')==saved['models'] and previous.get('id'):saved['id']=previous['id']
+        write_json(CONFIG/'image-selected.json',saved)
         # A real short generation measures the newly loaded image model automatically.
         try:
             print('Автозамер: создаём тестовое изображение 512×512.',flush=True)
@@ -171,13 +179,21 @@ def run(action,data):
             message='Image-модель загружена и проверена. '+str(measured['seconds'])+' с на тест.'
         except Exception as exc:message='Модель загружена. Автозамер не выполнен: '+str(exc)
         return {'message':message,'model':result}
-    if action=='image_generate':return generate(data)
+    if action=='image_download_preset':return download_preset(data.get('id'))
+    if action=='image_hf_download':
+        import image_hub
+        return image_hub.install(data)
+    if action=='image_generate':
+        ensure_generation_model();return generate(data)
     raise ValueError('Неизвестная image-операция.')
 
 def generate(data,benchmark=False):
     prompt=data.get('prompt','');size=data.get('size','512x512')
     if not isinstance(prompt,str) or not 1<=len(prompt)<=4000:raise ValueError('Описание: от 1 до 4000 символов.')
     if size not in {'256x256','512x512','768x768','1024x1024'}:raise ValueError('Выберите доступное разрешение.')
+    live={}
+    try:live=api('/sdcpp/v1/models/status',timeout=1)
+    except (OSError,ValueError):pass
     start_time=time.monotonic()
     result=api('/v1/images/generations',{'prompt':prompt,'n':1,'size':size,'output_format':'png'},timeout=600)
     elapsed=round(time.monotonic()-start_time,2)
@@ -187,7 +203,12 @@ def generate(data,benchmark=False):
     if not raw.startswith(b'\x89PNG'):raise ValueError('Сервер вернул неверный PNG.')
     (GALLERY/name).write_bytes(raw)
     entry={'file':name,'prompt':prompt,'seconds':elapsed,'size':size,'benchmark':benchmark,'created':time.time()}
-    rows=read_json(STATE/'gallery.json',[]);rows.insert(0,entry);write_json(STATE/'gallery.json',rows)
+    try:
+        active=live.get('models',{})
+        entry.update(model=Path(active.get('diffusion_model') or active.get('model') or '').name,recipe=live.get('recipe'))
+    except (OSError,ValueError):pass
+    with named_lock('gallery'):
+        rows=read_json(STATE/'gallery.json',[]);rows.insert(0,entry);write_json(STATE/'gallery.json',rows)
     return dict(entry,message='Изображение готово за '+str(elapsed)+' с.')
 
 
@@ -238,7 +259,8 @@ def guess_recipe(value):
             embedding=header.get('cond_stage_model.transformer.text_model.embeddings.token_embedding.weight',{})
             if embedding.get('shape',[0,0])[-1]==768:return 'sd1-checkpoint'
         except (OSError,ValueError,struct.error,AttributeError):pass
-    if 'qwen_image21' in arch or 'qwen-image-2.1' in name:return 'qwen-image-21'
+    if arch in {'qwen3vl','qwen2vl','qwen2','qwen3','llama','gemma','gemma3','gemma4'}:return None
+    if 'qwen_image21' in arch or 'qwen-image-2.1' in name:return 'qwen-image-21-turbo' if 'turbo' in name else 'qwen-image-21'
     if 'qwen_image' in arch or 'qwen-image' in name:return 'qwen-image'
     if 'flux' in arch or 'flux' in name:return 'flux1-schnell' if 'schnell' in name else 'flux1-dev'
     return None
@@ -259,7 +281,7 @@ def library():
     registered={str(Path(r['path']).resolve()) for r in rows if r.get('path')}
     known={c['file'] for r in rows for c in r.get('components',[])}|{Path(r['path']).name for r in rows if r.get('path')}
     for category in ['checkpoints','diffusion_models']:
-        for path in sorted((MODEL_DIR/category).glob('*')):
+        for path in sorted((MODEL_DIR/category).rglob('*')):
             if path.is_file() and path.suffix.lower() in {'.gguf','.safetensors','.ckpt'} and path.name not in known:
                 rows.append({'id':'file-'+hashlib.sha256(str(path).encode()).hexdigest()[:16],'name':path.stem,'path':str(path),'local':True,'recipe':guess_recipe(path)})
                 known.add(path.name);registered.add(str(path.resolve()))
@@ -275,13 +297,16 @@ def library():
     for row in rows:
         entry=dict(row);components=entry.get('components',[])
         if components:
-            entry['installed']=all((MODEL_DIR/c['category']/c['file']).is_file() and (MODEL_DIR/c['category']/c['file']).stat().st_size==c['size'] for c in components)
+            entry['installed']=all(component_path(c) is not None for c in components)
             size=sum(c['size'] for c in components)
         else:
             path=Path(entry['path']);entry['installed']=path.is_file();size=path.stat().st_size if path.is_file() else 0
         dependencies=read_json(ROOT/'assets/image-components.json',{'recipes':{}})['recipes'].get(entry.get('recipe'),[])
         extra=sum(c['size'] for c in dependencies if not (MODEL_DIR/c['category']/c['file']).is_file())
         entry['dependency_gib']=round(extra/1024**3,2)
+        if entry['installed']:
+            artifact=component_path(components[0]) if len(components)==1 else Path(entry['path']) if entry.get('path') else None
+            if artifact:entry['artifact_key']=str(artifact.resolve())
         entry['gib']=round(size/1024**3,2)
         entry['fits_disk']=(0 if entry['installed'] else size)+extra+2*1024**3<hw['disk_free_bytes']
         target=entry.get('min_vram_gib')
@@ -300,8 +325,13 @@ def use_library(ident):
     models={}
     if entry.get('components'):
         for component in entry['components']:
-            download(dict(component,url=component['url']))
-            models[component['slot']]=component['category']+'/'+component['file']
+            path=component_path(component)
+            if path and component.get('sha256'):
+                from common import digest_file
+                if digest_file(path)!=component['sha256']:path=None
+            if path is None:
+                download(dict(component,url=component['url']));path=MODEL_DIR/component['category']/component['file']
+            models[component['slot']]=path.relative_to(MODEL_DIR).as_posix()
     else:
         path=Path(entry['path']);category=guess_category(path)
         dest=MODEL_DIR/category/path.name
@@ -376,3 +406,75 @@ def resolve_components(recipe,models,files):
         existing=next((f for f in files if f.get('relative_path')==relative),None)
         if existing:result[slot]=existing['id']
     return result
+
+
+def gallery_remove(filename):
+    if not isinstance(filename,str) or not re.fullmatch(r'[a-f0-9]{32}\.png',filename):raise ValueError('Изображение не найдено.')
+    trash=GALLERY.parent/'gallery-trash'
+    with named_lock('gallery'):
+        rows=read_json(STATE/'gallery.json',[]);entry=next((r for r in rows if r['file']==filename),None)
+        if entry is None:raise ValueError('Изображение уже удалено или не найдено.')
+        src=GALLERY/filename
+        if src.is_symlink():raise ValueError('Операция недоступна для ссылки.')
+        trash.mkdir(parents=True,exist_ok=True)
+        write_json(trash/(filename+'.json'),entry)
+        if src.exists():os.replace(src,trash/filename)
+        write_json(STATE/'gallery.json',[r for r in rows if r['file']!=filename])
+    return {'file':filename,'message':'Изображение убрано в корзину. Можно восстановить.'}
+
+
+def gallery_restore(filename):
+    if not isinstance(filename,str) or not re.fullmatch(r'[a-f0-9]{32}\.png',filename):raise ValueError('Изображение не найдено.')
+    trash=GALLERY.parent/'gallery-trash'
+    with named_lock('gallery'):
+        entry=read_json(trash/(filename+'.json'),None)
+        if not entry or entry.get('file')!=filename:raise ValueError('Запись для восстановления не найдена.')
+        rows=read_json(STATE/'gallery.json',[])
+        if any(r['file']==filename for r in rows):return {'message':'Изображение уже восстановлено.'}
+        src=trash/filename
+        if not src.is_file() or src.is_symlink():raise ValueError('Файл изображения не найден в корзине.')
+        GALLERY.mkdir(parents=True,exist_ok=True)
+        if (GALLERY/filename).exists():raise ValueError('В галерее уже есть файл с таким именем.')
+        os.replace(src,GALLERY/filename);rows.insert(0,entry);write_json(STATE/'gallery.json',rows)
+    return {'message':'Изображение восстановлено.'}
+
+
+def gallery_trash():
+    trash=GALLERY.parent/'gallery-trash';rows=[]
+    with named_lock('gallery'):
+        for meta in trash.glob('*.png.json'):
+            entry=read_json(meta,None)
+            if entry and isinstance(entry.get('file'),str) and re.fullmatch(r'[a-f0-9]{32}\.png',entry['file']) and (trash/entry['file']).is_file():rows.append(entry)
+    return sorted(rows,key=lambda r:r.get('created',0),reverse=True)
+
+
+def component_path(component):
+    category=MODEL_DIR/component['category']
+    primary=category/component['file']
+    candidates=[primary]+list(category.rglob(component['file']))
+    return next((p for p in candidates if p.is_file() and (not component.get('size') or p.stat().st_size==component['size'])),None)
+
+
+def ensure_generation_model():
+    try:
+        if api('/sdcpp/v1/models/status',timeout=1).get('state')=='ready':return
+    except (OSError,ValueError):pass
+    selected=read_json(CONFIG/'image-selected.json',{})
+    if not selected.get('recipe') or not selected.get('models'):raise ValueError('Сначала выберите image-модель в разделе «Мои модели» или скачайте её из каталога.')
+    start()
+    print('Переключаемся на генератор: '+str(selected['recipe']),flush=True)
+    result=api('/sdcpp/v1/models/load',{'recipe':selected['recipe'],'models':selected['models']},timeout=240)
+    if result.get('state')!='ready':raise ValueError('Не удалось загрузить генератор: '+str(result.get('error') or result.get('state')))
+
+
+def download_preset(ident):
+    entry=next((r for r in library() if r['id']==ident),None)
+    if not entry or not entry.get('components'):raise ValueError('Выберите модель в каталоге.')
+    if not entry['fits_disk']:raise ValueError('Не хватает места для модели и компонентов.')
+    components=entry['components']+read_json(ROOT/'assets/image-components.json',{'recipes':{}})['recipes'].get(entry.get('recipe'),[])
+    from common import digest_file
+    for component in components:
+        existing=component_path(component)
+        if existing and component.get('sha256') and digest_file(existing)==component['sha256']:continue
+        download(component)
+    return {'message':'Модель и её известные компоненты скачаны. Работающий собеседник не переключался. Запустите генератор, когда понадобится.'}

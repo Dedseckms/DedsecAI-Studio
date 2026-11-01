@@ -42,11 +42,33 @@ try {
   shot=await call('Page.captureScreenshot',{format:'png'});await writeFile('/tmp/dedsecai-context.png',Buffer.from(shot.data,'base64'));
   await evaluate("document.getElementById('profile-close').click();location.hash='images'");await new Promise(r=>setTimeout(r,600));
   if(!await evaluate("!document.getElementById('images-view').hidden&&document.getElementById('overview').hidden"))throw Error('Image route failed');
+  await evaluate("document.getElementById('image-tab-catalog').click()");
   for(let i=0;i<80;i++){if(await evaluate("document.querySelectorAll('.image-model-card').length>=3"))break;await new Promise(r=>setTimeout(r,100));}
   if(!await evaluate("document.querySelectorAll('.image-model-card').length>=3&&!document.getElementById('image-advanced').open&&document.getElementById('image-pick').textContent.includes('Выбрать файл')"))throw Error('Simple image library missing');
   await evaluate("document.getElementById('image-library-search').value='SDXL';document.getElementById('image-library-search').dispatchEvent(new Event('input'))");
   if(!await evaluate("document.querySelectorAll('.image-model-card').length===1"))throw Error('Image search failed');
   await evaluate("document.getElementById('image-library-search').value='';document.getElementById('image-library-search').dispatchEvent(new Event('input'))");
+  if(!await evaluate("document.getElementById('resource-text')&&document.getElementById('resource-image')"))throw Error('Resource status missing');
+  await evaluate("document.getElementById('image-uncensored').checked=true;document.getElementById('image-uncensored').dispatchEvent(new Event('change'))");
+  if(!await evaluate("document.querySelectorAll('.image-model-card').length>=4&&[...document.querySelectorAll('.image-model-card h3')].every(n=>n.textContent.includes('Uncensored'))"))throw Error('Uncensored catalog filter failed');
+  await evaluate("document.getElementById('image-uncensored').checked=false;document.getElementById('image-uncensored').dispatchEvent(new Event('change'))");
+  await evaluate("document.getElementById('image-tab-hub').click();document.getElementById('image-hub-query').value='abenzerps/Qwen-Image-2.1-Uncensored-Quantized';document.getElementById('image-hub-search').click()");
+  for(let i=0;i<120;i++){if(await evaluate("!document.getElementById('image-hub-files').hidden&&document.getElementById('image-hub-variant').options.length>=4"))break;await new Promise(r=>setTimeout(r,100));}
+  if(!await evaluate("document.getElementById('image-hub-variant').options.length>=4&&[...document.getElementById('image-hub-variant').options].every(o=>!o.textContent.includes('MLX'))"))throw Error('Image HF variants or format filtering failed');
+  await evaluate("document.getElementById('image-tab-catalog').click()");
+  if(!process.env.STUDIO_URL){
+    await evaluate("document.querySelector('[data-gallery-delete=\"ffffffffffffffffffffffffffffffff.png\"]').click()");
+    if(!await evaluate("document.getElementById('gallery-delete-dialog').open"))throw Error('Delete confirmation missing');
+    await evaluate("document.getElementById('gallery-delete-cancel').click()");
+    if(!await evaluate("document.querySelector('[data-gallery-delete=\"ffffffffffffffffffffffffffffffff.png\"]')"))throw Error('Cancel removed fixture');
+    await evaluate("document.querySelector('[data-gallery-delete=\"ffffffffffffffffffffffffffffffff.png\"]').click();document.getElementById('gallery-delete-confirm').click()");
+    for(let i=0;i<80;i++){if(await evaluate("!document.getElementById('gallery-delete-dialog').open&&!document.querySelector('[data-gallery-delete=\"ffffffffffffffffffffffffffffffff.png\"]')"))break;await new Promise(r=>setTimeout(r,100));}
+    if(!await evaluate("!document.querySelector('[data-gallery-delete=\"ffffffffffffffffffffffffffffffff.png\"]')"))throw Error('Gallery delete failed');
+    await evaluate("document.getElementById('gallery-trash-toggle').click();[...document.querySelectorAll('.gallery-card')].find(c=>c.textContent.includes('QA gallery lifecycle fixture')).querySelector('button').click()");
+    for(let i=0;i<80;i++){if(await evaluate("![...document.querySelectorAll('.gallery-card')].some(c=>c.textContent.includes('QA gallery lifecycle fixture'))"))break;await new Promise(r=>setTimeout(r,100));}
+    await evaluate("document.getElementById('gallery-trash-toggle').click()");
+    if(!await evaluate("document.querySelector('[data-gallery-delete=\"ffffffffffffffffffffffffffffffff.png\"]')"))throw Error('Gallery restore failed');
+  }
   shot=await call('Page.captureScreenshot',{format:'png'});await writeFile('/tmp/dedsecai-images.png',Buffer.from(shot.data,'base64'));
   await evaluate("location.hash='chat'");await new Promise(r=>setTimeout(r,400));
   if(!await evaluate("document.getElementById('chat-images').accept.includes('image/png')"))throw Error('Image attachments missing');

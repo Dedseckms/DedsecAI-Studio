@@ -12,6 +12,7 @@ def run(data):
  action=data['action']
  with lock():
   if action=='start':manager.start()
+  elif action=='text_stop':runtime.stop()
   elif action=='stop':
    runtime.stop()
    import imaging

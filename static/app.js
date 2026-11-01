@@ -2,7 +2,7 @@
 const $ = id => document.getElementById(id);
 let state = null, modelSignature = '', lastJob = '', recentSignature = '', polling = false;
 let toastTimer;
-const jobTitles = {image_use:'Подготавливаем image-модель: скачивание, запуск и проверка',image_pick:'Выбери файл image-модели',profile:'Применяем контекст',image_setup:'Устанавливаем движок изображений',image_start:'Загружаем image-модель',image_stop:'Останавливаем image-сервер',image_generate:'Рисуем изображение',chat:'Собеседник отвечает',start:'Запускаем сервер',stop:'Останавливаем сервер',restart:'Перезапускаем сервер',use:'Переключаем модель',download:'Скачиваем и проверяем модель',bench:'Измеряем скорость',choose:'Выбери папку проекта',choose_file:'Выбери GGUF',hf_download:'Скачиваем GGUF из Hugging Face',url_download:'Скачиваем GGUF по ссылке',local_import:'Добавляем локальную модель',setup_runtime:'Устанавливаем llama.cpp',setup_pi:'Устанавливаем Pi',pi:'Открываем Pi'};
+const jobTitles = {image_download_preset:'Скачиваем image-модель и компоненты',text_stop:'Выгружаем модель собеседника',image_hf_download:'Скачиваем image-модель из Hugging Face',image_use:'Подготавливаем image-модель: скачивание, запуск и проверка',image_pick:'Выбери файл image-модели',profile:'Применяем контекст',image_setup:'Устанавливаем движок изображений',image_start:'Загружаем image-модель',image_stop:'Останавливаем image-сервер',image_generate:'Рисуем изображение',chat:'Собеседник отвечает',start:'Запускаем сервер',stop:'Останавливаем сервер',restart:'Перезапускаем сервер',use:'Переключаем модель',download:'Скачиваем и проверяем модель',bench:'Измеряем скорость',choose:'Выбери папку проекта',choose_file:'Выбери GGUF',hf_download:'Скачиваем GGUF из Hugging Face',url_download:'Скачиваем GGUF по ссылке',local_import:'Добавляем локальную модель',setup_runtime:'Устанавливаем llama.cpp',setup_pi:'Устанавливаем Pi',pi:'Открываем Pi'};
 function toast(message, error = false) { const el=$('toast'); el.textContent=message; el.className='toast'+(error?' error':''); el.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.hidden=true,6000); }
 function node(tag, className, text) { const el=document.createElement(tag); if(className)el.className=className; if(text!==undefined)el.textContent=text; return el; }
 function button(text, callback, cls='secondary') { const el=node('button','button '+cls,text); el.type='button'; el.dataset.jobButton='true'; el.addEventListener('click',callback); return el; }
@@ -65,7 +65,7 @@ function renderJob() {
 }
 function render() {
   const m=state.models.find(m=>m.id===state.selected);
-  $('server-status').textContent=state.running?'● Сервер работает':'○ Сервер остановлен';$('server-status').className='status'+(state.running?' online':'');
+  $('server-status').textContent=state.running?'● Собеседник работает':state.resources?.image?.state==='ready'?'● Работает генератор':'○ Модели выгружены';$('server-status').className='status'+(state.running?' online':'');
   $('active-model').textContent=m?.name||'Модель не выбрана';$('active-description').textContent=m?.tasks||'';
   $('context').textContent=m?m.ctx.toLocaleString('ru-RU')+' токенов':'—';$('speed').textContent=m?.speed||'—';
   $('speed-note').textContent=m?.speed.includes('ЗАМЕР')?'Результат короткого запроса на твоём ПК':'Предварительная оценка; сделай замер после запуска';

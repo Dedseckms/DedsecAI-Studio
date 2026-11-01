@@ -9,7 +9,7 @@ import sys
 for _stream in (sys.stdin,sys.stdout,sys.stderr):
     if hasattr(_stream,"reconfigure"):_stream.reconfigure(encoding="utf-8",errors="replace")
 
-VERSION='0.3.2'
+VERSION='0.4.0'
 HOME=Path.home()
 ROOT=Path(__file__).resolve().parent
 if os.name=='nt':
@@ -55,6 +55,23 @@ def lock():
         else:
             import fcntl
             fcntl.flock(out,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        try:yield
+        finally:
+            if os.name=='nt':out.seek(0);msvcrt.locking(out.fileno(),msvcrt.LK_UNLCK,1)
+            else:fcntl.flock(out,fcntl.LOCK_UN)
+
+@contextlib.contextmanager
+def named_lock(name):
+    """Short cross-process transactions, independent of long model jobs."""
+    if not name.replace('-','').isalnum():raise ValueError('Invalid lock name')
+    with (CONFIG/(name+'.lock')).open('a+b') as out:
+        if os.name=='nt':
+            import msvcrt
+            if out.tell()==0:out.write(b'0');out.flush()
+            out.seek(0);msvcrt.locking(out.fileno(),msvcrt.LK_LOCK,1)
+        else:
+            import fcntl
+            fcntl.flock(out,fcntl.LOCK_EX)
         try:yield
         finally:
             if os.name=='nt':out.seek(0);msvcrt.locking(out.fileno(),msvcrt.LK_UNLCK,1)

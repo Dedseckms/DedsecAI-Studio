@@ -7,9 +7,10 @@ import imaging
 class ImageLibraryTests(unittest.TestCase):
  def test_catalog_has_complete_single_file_presets_and_checksums(self):
   rows=imaging.read_json(imaging.ROOT/'assets/image-catalog.json')['models']
-  self.assertEqual({r['id'] for r in rows},{'sd-turbo','sd15','sdxl-turbo'})
+  self.assertTrue({'sd-turbo','sd15','sdxl-turbo'}<={r['id'] for r in rows})
+  self.assertGreaterEqual(sum(bool(r.get('uncensored')) for r in rows),4)
   for row in rows:
-   self.assertEqual(row['components'][0]['slot'],'model')
+   self.assertIn(row['components'][0]['slot'],{'model','diffusion_model'})
    self.assertEqual(len(row['components'][0]['sha256']),64)
    self.assertIn('/resolve/',row['components'][0]['url'])
  def test_own_files_and_recipe_are_found_without_link_entry(self):

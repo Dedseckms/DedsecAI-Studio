@@ -53,6 +53,82 @@
           "url": "https://huggingface.co/stabilityai/sdxl-turbo/resolve/71153311d3dbb46851df1931d3ca6e939de83304/sd_xl_turbo_1.0_fp16.safetensors"
         }
       ]
+    },
+    {
+      "id": "qwen21-uc-q4-k-m",
+      "name": "Qwen Image 2.1 · Uncensored · Q4_K_M",
+      "recipe": "qwen-image-21",
+      "source": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+      "uncensored": true,
+      "min_vram_gib": 12,
+      "why": "Qwen Image 2.1. Квантовка Q4_K_M.",
+      "components": [
+        {
+          "slot": "diffusion_model",
+          "category": "diffusion_models",
+          "file": "qwen-image-2.1-UC-Q4_K_M.gguf",
+          "size": 4604558112,
+          "sha256": "e79c8a009f2ecbdb6c70fd663d9aea9ee304a0d91f347e4169a756b8ad141b41",
+          "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized/resolve/7959e658915f52274897fb573ffeda49de8dc16b/qwen-image-2.1-UC-Q4_K_M.gguf"
+        }
+      ]
+    },
+    {
+      "id": "qwen21-uc-q5-k-m",
+      "name": "Qwen Image 2.1 · Uncensored · Q5_K_M",
+      "recipe": "qwen-image-21",
+      "source": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+      "uncensored": true,
+      "min_vram_gib": 12,
+      "why": "Qwen Image 2.1. Квантовка Q5_K_M.",
+      "components": [
+        {
+          "slot": "diffusion_model",
+          "category": "diffusion_models",
+          "file": "qwen-image-2.1-UC-Q5_K_M.gguf",
+          "size": 5221284640,
+          "sha256": "af0bf278cf16d204fb31c384dc82fd41dca82d976b15fe9305a60c726fd6f821",
+          "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized/resolve/7959e658915f52274897fb573ffeda49de8dc16b/qwen-image-2.1-UC-Q5_K_M.gguf"
+        }
+      ]
+    },
+    {
+      "id": "qwen21-uc-q6-k",
+      "name": "Qwen Image 2.1 · Uncensored · Q6_K",
+      "recipe": "qwen-image-21",
+      "source": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+      "uncensored": true,
+      "min_vram_gib": 12,
+      "why": "Qwen Image 2.1. Квантовка Q6_K.",
+      "components": [
+        {
+          "slot": "diffusion_model",
+          "category": "diffusion_models",
+          "file": "qwen-image-2.1-UC-Q6_K.gguf",
+          "size": 5876556576,
+          "sha256": "e14bb312109333b3d73b92ad9b9ac8b29b51f2edca1e7b86d1af1981bf1c4ee3",
+          "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized/resolve/7959e658915f52274897fb573ffeda49de8dc16b/qwen-image-2.1-UC-Q6_K.gguf"
+        }
+      ]
+    },
+    {
+      "id": "qwen21-uc-q8-0",
+      "name": "Qwen Image 2.1 · Uncensored · Q8_0",
+      "recipe": "qwen-image-21",
+      "source": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized",
+      "uncensored": true,
+      "min_vram_gib": 16,
+      "why": "Qwen Image 2.1. Квантовка Q8_0.",
+      "components": [
+        {
+          "slot": "diffusion_model",
+          "category": "diffusion_models",
+          "file": "qwen-image-2.1-UC-Q8_0.gguf",
+          "size": 7591557920,
+          "sha256": "cde456c72ea3ecebfc1be783300e972711d875e0c5f1bed33d42b66b156affa8",
+          "url": "https://huggingface.co/abenzerps/Qwen-Image-2.1-Uncensored-Quantized/resolve/7959e658915f52274897fb573ffeda49de8dc16b/qwen-image-2.1-UC-Q8_0.gguf"
+        }
+      ]
     }
   ]
 }

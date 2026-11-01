@@ -54,7 +54,7 @@ def submit(action,data):
 
 def _submit(action,data):
     global job,active_process,active_thread
-    allowed={'start','stop','restart','use','download','bench','choose','pi','chat','hf_download','url_download','local_import','choose_file','setup_runtime','setup_pi','profile','cancel','image_generate','image_setup','image_start','image_stop','image_load','image_download','image_import','image_use','image_pick'}
+    allowed={'start','stop','restart','use','download','bench','choose','pi','chat','hf_download','url_download','local_import','choose_file','setup_runtime','setup_pi','profile','cancel','image_generate','image_setup','image_start','image_stop','image_load','image_download','image_import','image_use','image_pick','image_hf_download','text_stop','image_download_preset'}
     if not isinstance(action,str) or action not in allowed:raise ValueError('Неизвестное действие.')
     item=None;path=None
     if action in {'use','download','profile'}:
@@ -64,7 +64,7 @@ def _submit(action,data):
     if action=='local_import':
         if not isinstance(data.get('path'),str):raise ValueError('Укажите файл GGUF.')
         path=Path(data['path']).expanduser().resolve(strict=True)
-    preempt=action in {'stop','restart','use','profile','cancel','image_stop','image_start','image_load','image_use'}
+    preempt=action in {'stop','restart','use','profile','cancel','image_stop','image_start','image_load','image_use','text_stop'}
     with job_lock:
         previous=job if job and job['status'] in {'running','cancelling'} else None
         if previous and not preempt:raise BlockingIOError('Операция выполняется. Можно остановить её или выбрать другую модель.')
@@ -132,7 +132,11 @@ def status():
     with job_lock:current=dict(job) if job else None
     try:exe=runtime.binary()
     except ValueError:exe=None
-    return dict(csrf=TOKEN,version=VERSION,brand='DedsecAI Studio',running=runtime.healthy(),selected=manager.selected(),gpu=gpu_view,hardware=hw,
+    import resources
+    resource_state=resources.snapshot()
+    alias_names={m.get('alias',m['id']):m['name'] for m in manager.raw_catalog()}
+    resource_state['text']['display_name']=alias_names.get(resource_state['text']['name'],resource_state['text']['name'])
+    return dict(resources=resource_state,csrf=TOKEN,version=VERSION,brand='DedsecAI Studio',running=runtime.healthy(),selected=manager.selected(),gpu=gpu_view,hardware=hw,
                 models=rows,projects=recent(),home=str(HOME),default_project=str(HOME/'Projects' if (HOME/'Projects').is_dir() else HOME),job=current,
                 operation_log=tail(current['logfile']) if current else '',server_log=tail(manager.server_log()),runtime={'executable':exe,'pi':desktop.pi_available()},
                 moderation=moderation.public(manager.selected()),data_directory=str(APP_HOME))
@@ -163,14 +167,21 @@ class Handler(BaseHTTPRequestHandler):
             elif path.startswith('/api/attachment/'):
                 mime,raw=companion.attachment(path.rsplit('/',1)[1]);self.respond(200,raw,mime)
             elif path=='/api/memory':self.respond(200,{'memories':companion.memories(),'automatic':manager.read_json(manager.CONFIG/'memory.json',{}).get('automatic',True)})
+            elif path=='/api/images/hub/search':
+                import image_hub
+                self.respond(200,{'results':image_hub.search(query.get('q',[''])[0],query.get('uncensored',['0'])[0]=='1')})
+            elif path=='/api/images/hub/inspect':
+                import image_hub
+                self.respond(200,image_hub.inspect(query.get('repo',[''])[0]))
             elif path=='/api/images':
                 import imaging
                 self.respond(200,imaging.state())
-            elif path.startswith('/gallery/'):
+            elif path.startswith(('/gallery/','/gallery-trash/')):
                 import imaging,re
                 name=path.rsplit('/',1)[1]
                 if not re.fullmatch(r'[a-f0-9]{32}\.png',name):raise ValueError('Изображение не найдено.')
-                self.respond(200,(imaging.GALLERY/name).read_bytes(),'image/png')
+                directory=imaging.GALLERY.parent/'gallery-trash' if path.startswith('/gallery-trash/') else imaging.GALLERY
+                self.respond(200,(directory/name).read_bytes(),'image/png')
             elif path=='/api/installers':
                 manifest=manager.read_json(ROOT/'dist/manifest.json',{'files':[]})
                 self.respond(200,{'files':[dict(r,url='/downloads/'+r['file']) for r in manifest['files']]})
@@ -205,6 +216,12 @@ class Handler(BaseHTTPRequestHandler):
             if self.path=='/api/chat/new':self.respond(200,companion.create())
             elif self.path=='/api/chat/send':self.respond(202,{'job':submit('chat',data)})
             elif self.path=='/api/chat/stop':chat_engine.cancel();self.respond(200,{'stopping':True})
+            elif self.path=='/api/images/delete':
+                import imaging
+                self.respond(200,imaging.gallery_remove(data.get('file')))
+            elif self.path=='/api/images/restore':
+                import imaging
+                self.respond(200,imaging.gallery_restore(data.get('file')))
             elif self.path=='/api/memory/settings':
                 manager.write_json(manager.CONFIG/'memory.json',{'automatic':data.get('automatic') is True});self.respond(200,{'saved':True})
             elif self.path=='/api/memory/save':self.respond(200,{'id':companion.save_memory(data.get('content'),data.get('id')),'memories':companion.memories()})

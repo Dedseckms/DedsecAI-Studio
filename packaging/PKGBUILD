@@ -1,5 +1,5 @@
 pkgname=dedsecai-studio
-pkgver=0.3.2
+pkgver=0.4.0
 pkgrel=1
 pkgdesc='Local AI studio: GGUF catalog, chat, memory and hardware profiles'
 arch=('any')
