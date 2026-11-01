@@ -1,8 +1,8 @@
 <p align="center"><img src="static/brand.svg" width="110" alt="DedsecAI Studio: двоичная D"></p>
 
-# DedsecAI Studio 0.3.1
+# DedsecAI Studio 0.3.2
 
-**Скачать установщик:** [Windows EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.3.1/DedsecAI-Studio-0.3.1-Setup.exe) · [Arch Linux](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.3.1/dedsecai-studio-0.3.1-1-any.pkg.tar.zst) · [Debian/Ubuntu](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.3.1/dedsecai-studio_0.3.1_all.deb) · [Все файлы и SHA-256](https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.3.1).
+**Скачать установщик:** [Windows EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.3.2/DedsecAI-Studio-0.3.2-Setup.exe) · [Arch Linux](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.3.2/dedsecai-studio-0.3.2-1-any.pkg.tar.zst) · [Debian/Ubuntu](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.3.2/dedsecai-studio_0.3.2_all.deb) · [Все файлы и SHA-256](https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.3.2).
 
 Предварительный релиз. Windows EXE собран и проверен на целостность; полная установка на Windows/Debian ещё требует приёмочной проверки. EXE не подписан. Для установки runtime/Pi нужен интернет; веса моделей скачиваются отдельно.
 
@@ -30,7 +30,7 @@ Python 3.10+, Windows 10/11, Arch Linux и Debian/Ubuntu. Интерфейс: ht
 
 ### Windows
 
-Запустите `DedsecAI-Studio-0.3.1-Setup.exe` — мастер установки с выбором llama.cpp, Pi и автозапуска. Альтернатива: распакуйте Windows ZIP и запустите `installers\install-windows.cmd`.
+Запустите `DedsecAI-Studio-0.3.2-Setup.exe` — мастер установки с выбором llama.cpp, Pi и автозапуска. Альтернатива: распакуйте Windows ZIP и запустите `installers\install-windows.cmd`.
 Нужен Python 3.10+ с Tcl/Tk. При отсутствии подходящего Python/Tk/FTS5 установщик скачивает официальный Python 3.14.10, проверяет SHA-256 и Authenticode издателя и устанавливает его для текущего пользователя. winget не требуется.
 Устанавливается готовый Vulkan runtime llama.cpp (либо CPU: PowerShell `-Backend cpu`), затем Pi и Node.js при необходимости.
 В меню Пуск появляется DedsecAI Studio, сервер панели запускается при входе. Для отключения: `-NoAutostart`.
@@ -46,7 +46,7 @@ Windows CUDA: укажите собственный проверенный llama
 ### Debian / Ubuntu
 
 Распакуйте Debian архив: `bash installers/install-debian.sh`.
-Либо установите DEB: `sudo apt install ./dedsecai-studio_0.3.1_all.deb` и откройте приложение из меню.
+Либо установите DEB: `sudo apt install ./dedsecai-studio_0.3.2_all.deb` и откройте приложение из меню.
 DEB ставит приложение; runtime/Pi настраиваются кнопками в разделе «Система».
 Скриптовый установщик ставит зависимости и настраивает runtime/Pi сразу.
 Сборка llama.cpp из исходников использует glibc целевой системы — архив Ubuntu runtime не подставляется в старый Debian.
@@ -78,7 +78,8 @@ Kimi K2 — сотни ГиБ весов. MoE active parameters не замен�
 Vision-модель и её проектор должны соответствовать друг другу. При импорте Hugging Face выбирайте mmproj; у локальной модели укажите полный путь в профиле. До четырёх PNG/JPEG/WebP до 6 МиБ сохраняются вместе с сообщением. Для картинок резервируется дополнительный контекст. Точное число image-токенов зависит от модели.
 
 Во вкладке «Изображения» выберите SD Turbo, SD 1.5 или SDXL Turbo и нажмите «Скачать и запустить». Движок, рецепт и основной файл подключаются автоматически. Каталог показывает объём загрузки и ориентир по GPU вашего ПК. Ссылка не требуется.
-Свой GGUF/safetensors/ckpt можно добавить кнопкой «Выбрать файл с компьютера». Известные типы распознаются автоматически; для составных моделей подбираются однозначно подходящие компоненты из библиотеки, а недостающие перечисляются явно. Рецепт, компоненты и прямые ссылки остаются в свёрнутых дополнительных настройках. Из каталога импортированный image-GGUF можно подключить кнопкой «В изображения»: создаётся hard link, оригинал сохраняется. При импорте между разными дисками файл копируется после проверки свободного места; оригинал сохраняется. Рецепты берутся из закреплённого runtime.
+Свой GGUF/safetensors/ckpt можно добавить кнопкой «Выбрать файл с компьютера». Известные типы распознаются автоматически; для составных моделей подбираются однозначно подходящие компоненты из библиотеки, а недостающие перечисляются явно. Для Qwen Image 2.1 и Turbo недостающие Qwen3-VL-8B Q4_K_M и VAE 2.1 скачиваются и подключаются автоматически по закреплённым ревизиям и SHA-256. В карточке указан дополнительный объём. Полный VAE не скачивается, если уже выбран подходящий TAE. Проверяются также группы «нужен хотя бы один компонент», например VAE/TAE.
+Рецепт, компоненты и прямые ссылки остаются в свёрнутых дополнительных настройках. Из каталога импортированный image-GGUF можно подключить кнопкой «В изображения»: создаётся hard link, оригинал сохраняется. При импорте между разными дисками файл копируется после проверки свободного места; оригинал сохраняется. Рецепты берутся из закреплённого runtime.
 Скорость генератора проверяется реальным изображением после загрузки всех компонентов. Автозамеры можно прервать кнопкой остановки. Запуск генератора освобождает текстовую модель; запуск текстовой модели останавливает генератор. Image-runtime устанавливается отдельно кнопкой: x64 Windows и Linux, CPU/Vulkan.
 
 ## Автоматическая память

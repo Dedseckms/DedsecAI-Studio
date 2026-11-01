@@ -44,4 +44,46 @@ class ImageLibraryTests(unittest.TestCase):
    with patch.object(imaging,'library',return_value=[entry]),patch.object(imaging,'MODEL_DIR',root/'models'):
     with self.assertRaises(ValueError):imaging.use_library('mine')
 
+
+class DependencyTests(unittest.TestCase):
+ def recipe(self):
+  return {'id':'qwen-image-21','slots':[{'id':'diffusion_model','required':True},{'id':'llm','required':True,'label':'Encoder'},{'id':'vae','required':False},{'id':'tae','required':False}], 'required_any':[['vae','tae']]}
+ def test_decoder_alternative_is_required_even_when_slots_are_optional(self):
+  missing=imaging.missing_components(self.recipe(),{'diffusion_model':'main','llm':'encoder'})
+  self.assertEqual(missing,['vae / tae'])
+  self.assertEqual(imaging.missing_components(self.recipe(),{'diffusion_model':'main','llm':'encoder','tae':'tiny'}),[])
+ def test_encoder_and_vae_download_and_use_runtime_ids(self):
+  components=[{'slot':'llm','category':'text_encoders','file':'encoder.gguf','size':4},{'slot':'vae','category':'vae','file':'decoder.safetensors','size':4}]
+  files=[]
+  def downloaded(component):
+   relative=component['category']+'/'+component['file'];files.append({'id':'opaque-'+component['slot'],'relative_path':relative})
+  with patch.object(imaging,'read_json',return_value={'recipes':{'qwen-image-21':components}}),patch.object(imaging,'download',side_effect=downloaded) as download,patch.object(imaging,'api',side_effect=lambda path,*a,**k: {'files':files} if path.endswith('/model-files') else {}):
+   result=imaging.resolve_components(self.recipe(),{'diffusion_model':'main'},[])
+  self.assertEqual(result,{'diffusion_model':'main','llm':'opaque-llm','vae':'opaque-vae'});self.assertEqual(download.call_count,2)
+ def test_selected_tiny_decoder_does_not_trigger_full_vae_download(self):
+  components=[{'slot':'vae','category':'vae','file':'decoder.safetensors','size':4}]
+  with patch.object(imaging,'read_json',return_value={'recipes':{'qwen-image-21':components}}),patch.object(imaging,'download') as download:
+   result=imaging.resolve_components(self.recipe(),{'diffusion_model':'main','llm':'enc','tae':'already-selected'},[])
+  download.assert_not_called();self.assertEqual(result['tae'],'already-selected')
+ def test_other_architecture_never_uses_qwen21_components(self):
+  with patch.object(imaging,'read_json',return_value={'recipes':{'qwen-image-21':[]}}),patch.object(imaging,'download') as download:
+   result=imaging.resolve_components({'id':'qwen-image','slots':[]},{'diffusion_model':'main'},[])
+  download.assert_not_called();self.assertEqual(result,{'diffusion_model':'main'})
+ def test_advanced_load_also_resolves_dependencies(self):
+  recipe=self.recipe();resolved={'diffusion_model':'main','llm':'encoder','vae':'decoder'};payloads=[]
+  def fake_api(path,payload=None,**kwargs):
+   if path.endswith('/recipes'):return {'recipes':[recipe]}
+   if path.endswith('/model-files'):return {'files':[]}
+   if path.endswith('/models/load'):payloads.append(payload);return {'state':'ready'}
+   return {}
+  with patch.object(imaging,'read_json',return_value={'recipes':{'qwen-image-21':[]}}),patch.object(imaging,'api',side_effect=fake_api),patch.object(imaging,'resolve_components',return_value=resolved),patch.object(imaging,'generate',return_value={'seconds':1}):
+   imaging.run('image_load',{'recipe':'qwen-image-21','models':{'diffusion_model':'main'}})
+  self.assertEqual(payloads[0]['models'],resolved)
+ def test_complete_partial_download_can_finish_without_another_http_request(self):
+  import hashlib
+  with tempfile.TemporaryDirectory() as d,patch.object(imaging,'MODEL_DIR',Path(d)),patch.object(imaging,'api',side_effect=OSError('offline')),patch('hub.HTTP.open') as open_http:
+   p=Path(d)/'text_encoders/encoder.gguf.part';p.parent.mkdir();p.write_bytes(b'GGUF')
+   imaging.download({'url':'https://example.org/encoder.gguf','category':'text_encoders','size':4,'sha256':hashlib.sha256(b'GGUF').hexdigest()})
+   self.assertEqual(p.with_suffix('').read_bytes(),b'GGUF');open_http.assert_not_called()
+
 if __name__=='__main__':unittest.main()

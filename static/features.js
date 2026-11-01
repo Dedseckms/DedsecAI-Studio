@@ -33,8 +33,8 @@ function renderImageLibrary(){
  const sig=JSON.stringify([rows,q]);if(sig===imageLibrarySig)return;imageLibrarySig=sig;
  const f=document.createDocumentFragment();let count=0;
  for(const m of rows){if(q&&!m.name.toLowerCase().includes(q))continue;count++;
-  const card=node('article','image-model-card');card.append(node('span','eyebrow',m.installed?'НА КОМПЬЮТЕРЕ':m.local?'СВОЙ ФАЙЛ':'КАТАЛОГ'),node('h3','',m.name),node('p','',m.gib+' ГиБ · '+(m.why||'Твоя модель для генерации изображений.')),node('p','image-assessment',m.assessment));
-  const b=button(m.installed?'▶ Выбрать и запустить':'↓ Скачать и запустить',()=>action('image_use',{id:m.id}),'primary');b.disabled=!m.fits_disk;b.dataset.diskBlocked=String(!m.fits_disk);if(!m.fits_disk)b.textContent='Недостаточно места';card.append(b);
+  const card=node('article','image-model-card');card.append(node('span','eyebrow',m.installed?'НА КОМПЬЮТЕРЕ':m.local?'СВОЙ ФАЙЛ':'КАТАЛОГ'),node('h3','',m.name),node('p','',m.gib+' ГиБ'+(m.dependency_gib?' + '+m.dependency_gib+' ГиБ компонентов':'')+' · '+(m.why||'Твоя модель для генерации изображений.')),node('p','image-assessment',m.assessment));
+  const b=button(m.dependency_gib?'↓ Догрузить и запустить':m.installed?'▶ Выбрать и запустить':'↓ Скачать и запустить',()=>action('image_use',{id:m.id}),'primary');b.disabled=!m.fits_disk;b.dataset.diskBlocked=String(!m.fits_disk);if(!m.fits_disk)b.textContent='Недостаточно места';card.append(b);
   if(m.source){const a=node('a','small-text muted','Карточка модели и лицензия ↗');a.href=m.source;a.target='_blank';a.rel='noopener noreferrer';card.append(a);}f.append(card);
  }
  $('image-library').replaceChildren(f);$('image-library-empty').hidden=count>0;

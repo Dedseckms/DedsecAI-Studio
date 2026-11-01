@@ -121,13 +121,19 @@ def download(data):
     have=part.stat().st_size if part.exists() else 0
     headers={'Range':f'bytes={have}-'} if have else {}
     if os.environ.get('HF_TOKEN') and urllib.parse.urlsplit(url).hostname=='huggingface.co':headers['Authorization']='Bearer '+os.environ['HF_TOKEN']
-    with hub.HTTP.open(urllib.request.Request(url,headers=headers),timeout=60) as src,part.open('ab') as out:
-        if have and (src.status!=206 or not src.headers.get('Content-Range','').startswith(f'bytes {have}-')):raise ValueError('Источник не поддержал докачку. Частичный файл сохранён.')
-        expected_bytes=int(src.headers.get('Content-Length','0'));received=0
-        for chunk in iter(lambda:src.read(2*1024*1024),b''):
-            if shutil.disk_usage(MODEL_DIR).free<len(chunk)+2*1024**3:raise ValueError('Недостаточно свободного места.')
-            out.write(chunk);received+=len(chunk)
-        if expected_bytes and received!=expected_bytes:raise ValueError('Загрузка неполная; повторите для докачки.')
+    if data.get('size') and have>data['size']:raise ValueError('Частичный файл больше ожидаемого; он сохранён: '+str(part))
+    print('Компонент: '+name,flush=True)
+    if not (data.get('size') and have==data['size']):
+        with hub.HTTP.open(urllib.request.Request(url,headers=headers),timeout=60) as src,part.open('ab') as out:
+            if have and (src.status!=206 or not src.headers.get('Content-Range','').startswith(f'bytes {have}-')):raise ValueError('Источник не поддержал докачку. Частичный файл сохранён.')
+            expected_bytes=int(src.headers.get('Content-Length','0'));received=0;reported=0
+            if expected_bytes and shutil.disk_usage(MODEL_DIR).free<expected_bytes+2*1024**3:raise ValueError('Недостаточно места для компонента и резерва 2 ГиБ.')
+            for chunk in iter(lambda:src.read(2*1024*1024),b''):
+                if shutil.disk_usage(MODEL_DIR).free<len(chunk)+2*1024**3:raise ValueError('Недостаточно свободного места.')
+                out.write(chunk);received+=len(chunk)
+                if received-reported>=128*1024**2:
+                    print(name+': '+str(round((have+received)/1024**3,2))+' ГиБ',flush=True);reported=received
+            if expected_bytes and received!=expected_bytes:raise ValueError('Загрузка неполная; повторите для докачки.')
     from common import digest_file
     if expected and digest_file(part).lower()!=expected.lower():raise ValueError('SHA-256 не совпал. Файл не установлен.')
     os.replace(part,dest)
@@ -148,11 +154,19 @@ def run(action,data):
         if not value:return {'cancelled':True}
         return import_model(value,guess_category(value))
     if action=='image_load':
-        payload={'recipe':data.get('recipe'),'models':data.get('models',{})}
+        payload={'recipe':data.get('recipe'),'models':dict(data.get('models',{}))}
+        if payload['recipe'] in read_json(ROOT/'assets/image-components.json',{'recipes':{}})['recipes']:
+            recipe=next((r for r in api('/sdcpp/v1/recipes')['recipes'] if r['id']==payload['recipe']),None)
+            if recipe:
+                payload['models']=resolve_components(recipe,payload['models'],api('/sdcpp/v1/model-files')['files'])
+                missing=missing_components(recipe,payload['models'])
+                if missing:raise ValueError('Не хватает компонентов модели: '+', '.join(missing))
+        print('Загружаем модель и совместимые компоненты: '+str(payload['recipe']),flush=True)
         result=api('/sdcpp/v1/models/load',payload,timeout=240)
         if result.get('state')!='ready':raise ValueError('Image-модель не загрузилась: '+str(result.get('error') or result.get('state')))
         # A real short generation measures the newly loaded image model automatically.
         try:
+            print('Автозамер: создаём тестовое изображение 512×512.',flush=True)
             measured=generate({'prompt':'a small green cube on a black background','size':'512x512'},benchmark=True)
             message='Image-модель загружена и проверена. '+str(measured['seconds'])+' с на тест.'
         except Exception as exc:message='Модель загружена. Автозамер не выполнен: '+str(exc)
@@ -265,10 +279,14 @@ def library():
             size=sum(c['size'] for c in components)
         else:
             path=Path(entry['path']);entry['installed']=path.is_file();size=path.stat().st_size if path.is_file() else 0
+        dependencies=read_json(ROOT/'assets/image-components.json',{'recipes':{}})['recipes'].get(entry.get('recipe'),[])
+        extra=sum(c['size'] for c in dependencies if not (MODEL_DIR/c['category']/c['file']).is_file())
+        entry['dependency_gib']=round(extra/1024**3,2)
         entry['gib']=round(size/1024**3,2)
-        entry['fits_disk']=entry['installed'] or size+2*1024**3<hw['disk_free_bytes']
+        entry['fits_disk']=(0 if entry['installed'] else size)+extra+2*1024**3<hw['disk_free_bytes']
         target=entry.get('min_vram_gib')
         entry['assessment']=('Ориентир: комфортно на GPU этого ПК.' if target and vram>=target else 'Может потребоваться CPU или выгрузка части весов; будет медленнее.' if target else 'Свой файл: требования зависят от модели и её компонентов.')
+        if dependencies:entry['assessment']='Энкодер и VAE подключаются автоматически. Часть весов может использовать RAM/диск; генерация будет медленнее лёгких SD-моделей.'
         result.append(entry)
     return result
 
@@ -312,8 +330,49 @@ def use_library(ident):
             if not spec.get('required') or spec['id'] in models:continue
             candidates=[f for f in files if f.get('category') in spec.get('categories',[spec.get('category')]) and spec['id'].replace('_','') in Path(f.get('name','')).stem.lower().replace('_','').replace('-','')]
             if len(candidates)==1:models[spec['id']]=candidates[0]['id']
-        missing=[s.get('label',s['id']) for s in recipe['slots'] if s.get('required') and s['id'] not in models]
+        models=resolve_components(recipe,models,files)
+        missing=missing_components(recipe,models)
         if missing:raise ValueError('Основная модель найдена. Ей нужны ещё: '+', '.join(missing)+'. Добавьте совместимые компоненты в дополнительных настройках; их нельзя заменить произвольными файлами.')
     result=run('image_load',{'recipe':recipe_id,'models':models})
     write_json(CONFIG/'image-selected.json',{'id':ident,'recipe':recipe_id,'models':models})
+    return result
+
+
+def missing_components(recipe,models):
+    labels={s['id']:s.get('label',s['id']) for s in recipe['slots']}
+    missing=[labels[s['id']] for s in recipe['slots'] if s.get('required') and not models.get(s['id'])]
+    for group in recipe.get('required_any',[]):
+        if not any(models.get(slot) for slot in group):missing.append(' / '.join(labels.get(slot,slot) for slot in group))
+    return missing
+
+
+def resolve_components(recipe,models,files):
+    """Use pinned architecture-specific dependencies; never substitute another Qwen generation."""
+    result=dict(models)
+    manifest=read_json(ROOT/'assets/image-components.json',{'recipes':{}})
+    components=manifest['recipes'].get(recipe['id'],[])
+    changed=False
+    for component in components:
+        slot=component['slot']
+        if result.get(slot):continue
+        alternatives=next((g for g in recipe.get('required_any',[]) if slot in g),[])
+        if any(result.get(other) for other in alternatives):continue
+        relative=component['category']+'/'+component['file']
+        existing=next((f for f in files if f.get('relative_path')==relative),None)
+        path=MODEL_DIR/relative
+        if existing and path.is_file() and path.stat().st_size==component['size']:
+            result[slot]=existing['id'];continue
+        print('Автоматически подключаем '+slot+': '+component['file'],flush=True)
+        download(component);changed=True
+    if changed:
+        api('/sdcpp/v1/models/refresh',{})
+        files=api('/sdcpp/v1/model-files')['files']
+    for component in components:
+        slot=component['slot']
+        if result.get(slot):continue
+        alternatives=next((g for g in recipe.get('required_any',[]) if slot in g),[])
+        if any(result.get(other) for other in alternatives):continue
+        relative=component['category']+'/'+component['file']
+        existing=next((f for f in files if f.get('relative_path')==relative),None)
+        if existing:result[slot]=existing['id']
     return result
