@@ -11,7 +11,7 @@ def choose(kind='directory',initial=None):
     if os.name!='nt' and shutil.which('kdialog'):
         args=['kdialog','--title','DedsecAI Studio — выбор проекта' if kind=='directory' else 'DedsecAI Studio — импорт GGUF',
               '--getexistingdirectory' if kind=='directory' else '--getopenfilename',initial]
-        if kind!='directory':args.append('*.gguf | GGUF models')
+        if kind!='directory':args.append('*.gguf *.safetensors *.ckpt | Image models' if kind=='image' else '*.gguf | GGUF models')
         r=subprocess.run(args,capture_output=True,text=True,encoding='utf-8',timeout=600)
         if r.returncode==1:return None
         if r.returncode:raise ValueError('Не удалось открыть диалог. Укажите путь вручную.')
@@ -21,7 +21,7 @@ def choose(kind='directory',initial=None):
         from tkinter import filedialog
         root=tkinter.Tk();root.withdraw();root.attributes('-topmost',True)
         try:
-            return (filedialog.askdirectory(title='Выбери папку проекта',initialdir=initial) if kind=='directory' else filedialog.askopenfilename(title='Выбери GGUF',initialdir=initial,filetypes=[('GGUF','*.gguf')])) or None
+            return (filedialog.askdirectory(title='Выбери папку проекта',initialdir=initial) if kind=='directory' else filedialog.askopenfilename(title='Выбери GGUF',initialdir=initial,filetypes=[('Image models','*.gguf *.safetensors *.ckpt')] if kind=='image' else [('GGUF','*.gguf')])) or None
         finally:root.destroy()
     except (ImportError,RuntimeError) as exc:raise ValueError('Диалог недоступен. Укажите полный путь вручную; на Linux можно установить python3-tk / tk.') from exc
 

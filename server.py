@@ -54,7 +54,7 @@ def submit(action,data):
 
 def _submit(action,data):
     global job,active_process,active_thread
-    allowed={'start','stop','restart','use','download','bench','choose','pi','chat','hf_download','url_download','local_import','choose_file','setup_runtime','setup_pi','profile','cancel','image_generate','image_setup','image_start','image_stop','image_load','image_download','image_import'}
+    allowed={'start','stop','restart','use','download','bench','choose','pi','chat','hf_download','url_download','local_import','choose_file','setup_runtime','setup_pi','profile','cancel','image_generate','image_setup','image_start','image_stop','image_load','image_download','image_import','image_use','image_pick'}
     if not isinstance(action,str) or action not in allowed:raise ValueError('Неизвестное действие.')
     item=None;path=None
     if action in {'use','download','profile'}:
@@ -64,7 +64,7 @@ def _submit(action,data):
     if action=='local_import':
         if not isinstance(data.get('path'),str):raise ValueError('Укажите файл GGUF.')
         path=Path(data['path']).expanduser().resolve(strict=True)
-    preempt=action in {'stop','restart','use','profile','cancel','image_stop','image_start','image_load'}
+    preempt=action in {'stop','restart','use','profile','cancel','image_stop','image_start','image_load','image_use'}
     with job_lock:
         previous=job if job and job['status'] in {'running','cancelling'} else None
         if previous and not preempt:raise BlockingIOError('Операция выполняется. Можно остановить её или выбрать другую модель.')

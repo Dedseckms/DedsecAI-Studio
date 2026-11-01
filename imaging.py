@@ -1,5 +1,6 @@
 """Local stable-diffusion.cpp service, recipe selection and durable gallery."""
 import base64
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -7,6 +8,7 @@ import platform
 import re
 import shutil
 import signal
+import struct
 import subprocess
 import time
 import urllib.error
@@ -96,7 +98,7 @@ def start():
     raise ValueError('Image-сервер не ответил за 30 секунд.')
 
 def state():
-    result={'installed':bool(binary()),'running':False,'model_dir':str(MODEL_DIR),'gallery':read_json(STATE/'gallery.json',[])}
+    result={'installed':bool(binary()),'running':False,'model_dir':str(MODEL_DIR),'gallery':read_json(STATE/'gallery.json',[]),'library':library()}
     try:
         result.update(running=True,recipes=api('/sdcpp/v1/recipes'),files=api('/sdcpp/v1/model-files'),model=api('/sdcpp/v1/models/status'))
     except (OSError,ValueError):result['running']=False
@@ -111,7 +113,10 @@ def download(data):
     dest=MODEL_DIR/category/name;dest.parent.mkdir(parents=True,exist_ok=True)
     expected=data.get('sha256') or None
     if expected and not re.fullmatch('[a-fA-F0-9]{64}',expected):raise ValueError('Неверный SHA-256.')
-    if dest.exists():raise ValueError('Такой файл уже есть: '+str(dest))
+    if dest.exists():
+        from common import digest_file
+        if (not data.get('size') or dest.stat().st_size==data['size']) and expected and digest_file(dest).lower()==expected.lower():return {'message':'Файл уже скачан и проверен: '+name}
+        raise ValueError('Такой файл уже есть, но его соответствие загрузке не подтверждено: '+str(dest))
     part=dest.with_suffix(dest.suffix+'.part')
     have=part.stat().st_size if part.exists() else 0
     headers={'Range':f'bytes={have}-'} if have else {}
@@ -136,6 +141,12 @@ def run(action,data):
     if action=='image_stop':stop();return {'message':'Image-сервер остановлен.'}
     if action=='image_download':return download(data)
     if action=='image_import':return import_model(data.get('path'),data.get('category','diffusion_models'))
+    if action=='image_use':return use_library(data.get('id'))
+    if action=='image_pick':
+        import desktop
+        value=desktop.choose('image',MODEL_DIR)
+        if not value:return {'cancelled':True}
+        return import_model(value,guess_category(value))
     if action=='image_load':
         payload={'recipe':data.get('recipe'),'models':data.get('models',{})}
         result=api('/sdcpp/v1/models/load',payload,timeout=240)
@@ -175,7 +186,134 @@ def import_model(value,category='diffusion_models'):
         if not os.path.samefile(path,dest):raise ValueError('Файл с таким именем уже есть в image-models.')
     else:
         try:os.link(path,dest)
-        except OSError as exc:raise ValueError('Нельзя создать ссылку между этими дисками. Скопируйте файл в '+str(dest.parent)) from exc
+        except OSError:
+            if shutil.disk_usage(dest.parent).free<path.stat().st_size+2*1024**3:raise ValueError('Не хватает места для импорта с другого диска.')
+            print('Копируем модель с другого диска; исходный файл остаётся на месте.',flush=True)
+            partial=dest.with_suffix(dest.suffix+'.import.part');shutil.copyfile(path,partial);os.replace(partial,dest)
     try:api('/sdcpp/v1/models/refresh',{})
     except (OSError,ValueError):pass
+    register_local(dest)
     return {'message':'Веса доступны в «Изображения». Оригинал сохранён; дополнительное место для весов не занято. Выберите рецепт и необходимые энкодеры/VAE. Скорость измерится после загрузки модели.'}
+
+
+def guess_category(value):
+    name=Path(value).name.lower()
+    if any(x in name for x in ['sd_turbo','sd-turbo','sd_xl','sdxl','v1-5','sd15']):return 'checkpoints'
+    return 'diffusion_models'
+
+
+def guess_recipe(value):
+    name=Path(value).name.lower()
+    for entry in read_json(ROOT/'assets/image-catalog.json')['models']:
+        if any(c['file'].lower()==name for c in entry['components']):return entry['recipe']
+    if 'sdxl' in name or 'sd_xl' in name:return 'sdxl-turbo' if 'turbo' in name else 'sdxl-checkpoint'
+    if 'sd-turbo' in name or 'sd_turbo' in name:return 'sd-turbo'
+    if 'v1-5' in name or 'sd15' in name:return 'sd1-checkpoint'
+    arch=''
+    if Path(value).suffix.lower()=='.gguf':
+        from gguf import gguf_info
+        arch=gguf_info(Path(value)).get('general.architecture','')
+    if arch in {'sd1','sd15'}:return 'sd1-checkpoint'
+    if arch=='sdxl':return 'sdxl-checkpoint'
+    if Path(value).suffix.lower()=='.safetensors':
+        try:
+            with Path(value).open('rb') as src:
+                length=struct.unpack('<Q',src.read(8))[0]
+                header=json.loads(src.read(length)) if 0<length<=32*1024*1024 else {}
+            if any(k.startswith('conditioner.embedders.1.') for k in header):return 'sdxl-checkpoint'
+            embedding=header.get('cond_stage_model.transformer.text_model.embeddings.token_embedding.weight',{})
+            if embedding.get('shape',[0,0])[-1]==768:return 'sd1-checkpoint'
+        except (OSError,ValueError,struct.error,AttributeError):pass
+    if 'qwen_image21' in arch or 'qwen-image-2.1' in name:return 'qwen-image-21'
+    if 'qwen_image' in arch or 'qwen-image' in name:return 'qwen-image'
+    if 'flux' in arch or 'flux' in name:return 'flux1-schnell' if 'schnell' in name else 'flux1-dev'
+    return None
+
+
+def register_local(path):
+    rows=read_json(CONFIG/'image-library.json',[])
+    ident='local-'+hashlib.sha256(str(path.resolve()).encode()).hexdigest()[:16]
+    if any(c['file']==path.name for r in read_json(ROOT/'assets/image-catalog.json')['models'] for c in r['components']):return
+    if any(r['id']==ident for r in rows):return
+    rows.append({'id':ident,'name':path.stem,'recipe':guess_recipe(path),'path':str(path),'local':True})
+    write_json(CONFIG/'image-library.json',rows)
+
+
+def library():
+    import hardware,manager
+    rows=read_json(ROOT/'assets/image-catalog.json')['models']+read_json(CONFIG/'image-library.json',[])
+    registered={str(Path(r['path']).resolve()) for r in rows if r.get('path')}
+    known={c['file'] for r in rows for c in r.get('components',[])}|{Path(r['path']).name for r in rows if r.get('path')}
+    for category in ['checkpoints','diffusion_models']:
+        for path in sorted((MODEL_DIR/category).glob('*')):
+            if path.is_file() and path.suffix.lower() in {'.gguf','.safetensors','.ckpt'} and path.name not in known:
+                rows.append({'id':'file-'+hashlib.sha256(str(path).encode()).hexdigest()[:16],'name':path.stem,'path':str(path),'local':True,'recipe':guess_recipe(path)})
+                known.add(path.name);registered.add(str(path.resolve()))
+    # Show image weights already imported through the main model catalog as well.
+    for item in manager.raw_catalog():
+        if item.get('kind')=='image' and manager.installed(item):
+            path=manager.file_path(item)
+            if str(path.resolve()) not in registered and path.name not in known:
+                rows.append({'id':'model-'+item['id'],'name':item['name'],'path':str(path),'local':True,'recipe':guess_recipe(path)})
+                registered.add(str(path.resolve()))
+    hw=hardware.detect();vram=max((g.get('vram_bytes',0) for g in hw['gpus']),default=0)/1024**3
+    result=[]
+    for row in rows:
+        entry=dict(row);components=entry.get('components',[])
+        if components:
+            entry['installed']=all((MODEL_DIR/c['category']/c['file']).is_file() and (MODEL_DIR/c['category']/c['file']).stat().st_size==c['size'] for c in components)
+            size=sum(c['size'] for c in components)
+        else:
+            path=Path(entry['path']);entry['installed']=path.is_file();size=path.stat().st_size if path.is_file() else 0
+        entry['gib']=round(size/1024**3,2)
+        entry['fits_disk']=entry['installed'] or size+2*1024**3<hw['disk_free_bytes']
+        target=entry.get('min_vram_gib')
+        entry['assessment']=('Ориентир: комфортно на GPU этого ПК.' if target and vram>=target else 'Может потребоваться CPU или выгрузка части весов; будет медленнее.' if target else 'Свой файл: требования зависят от модели и её компонентов.')
+        result.append(entry)
+    return result
+
+
+def use_library(ident):
+    entry=next((r for r in library() if r['id']==ident),None)
+    if entry is None:raise ValueError('Модель не найдена. Обновите список.')
+    recipe_id=entry.get('recipe')
+    if not recipe_id:raise ValueError('Не удалось определить тип своего файла. Выберите рецепт один раз в дополнительных настройках.')
+    if not entry['fits_disk']:raise ValueError('Не хватает свободного места для этой модели.')
+    models={}
+    if entry.get('components'):
+        for component in entry['components']:
+            download(dict(component,url=component['url']))
+            models[component['slot']]=component['category']+'/'+component['file']
+    else:
+        path=Path(entry['path']);category=guess_category(path)
+        dest=MODEL_DIR/category/path.name
+        if not dest.exists():import_model(str(path),category)
+        elif not os.path.samefile(path,dest):raise ValueError('В библиотеке уже есть другой файл с таким именем. Выберите его или переименуйте свой файл.')
+        # Runtime returns opaque IDs; find them rather than constructing a file ID.
+    if not binary():
+        import hardware
+        setup('vulkan' if hardware.detect()['gpus'] else 'cpu')
+    start();api('/sdcpp/v1/models/refresh',{})
+    recipes=api('/sdcpp/v1/recipes')['recipes'];recipe=next((r for r in recipes if r['id']==recipe_id),None)
+    if recipe is None:raise ValueError('В установленном движке нет рецепта '+recipe_id)
+    files=api('/sdcpp/v1/model-files')['files']
+    if entry.get('components'):
+        for slot,relative in list(models.items()):
+            match=next((f for f in files if f.get('relative_path')==relative),None)
+            if not match:raise ValueError('Движок не обнаружил '+relative)
+            models[slot]=match['id']
+    else:
+        name=Path(entry['path']).name
+        main=next((f for f in files if Path(f.get('relative_path','')).name==name),None)
+        slot=next((s['id'] for s in recipe['slots'] if s['id'] in {'model','diffusion_model'}),None)
+        if not main or not slot:raise ValueError('Не удалось подключить основной файл модели.')
+        models[slot]=main['id']
+        for spec in recipe['slots']:
+            if not spec.get('required') or spec['id'] in models:continue
+            candidates=[f for f in files if f.get('category') in spec.get('categories',[spec.get('category')]) and spec['id'].replace('_','') in Path(f.get('name','')).stem.lower().replace('_','').replace('-','')]
+            if len(candidates)==1:models[spec['id']]=candidates[0]['id']
+        missing=[s.get('label',s['id']) for s in recipe['slots'] if s.get('required') and s['id'] not in models]
+        if missing:raise ValueError('Основная модель найдена. Ей нужны ещё: '+', '.join(missing)+'. Добавьте совместимые компоненты в дополнительных настройках; их нельзя заменить произвольными файлами.')
+    result=run('image_load',{'recipe':recipe_id,'models':models})
+    write_json(CONFIG/'image-selected.json',{'id':ident,'recipe':recipe_id,'models':models})
+    return result

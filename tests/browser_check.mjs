@@ -42,6 +42,11 @@ try {
   shot=await call('Page.captureScreenshot',{format:'png'});await writeFile('/tmp/dedsecai-context.png',Buffer.from(shot.data,'base64'));
   await evaluate("document.getElementById('profile-close').click();location.hash='images'");await new Promise(r=>setTimeout(r,600));
   if(!await evaluate("!document.getElementById('images-view').hidden&&document.getElementById('overview').hidden"))throw Error('Image route failed');
+  for(let i=0;i<80;i++){if(await evaluate("document.querySelectorAll('.image-model-card').length>=3"))break;await new Promise(r=>setTimeout(r,100));}
+  if(!await evaluate("document.querySelectorAll('.image-model-card').length>=3&&!document.getElementById('image-advanced').open&&document.getElementById('image-pick').textContent.includes('Выбрать файл')"))throw Error('Simple image library missing');
+  await evaluate("document.getElementById('image-library-search').value='SDXL';document.getElementById('image-library-search').dispatchEvent(new Event('input'))");
+  if(!await evaluate("document.querySelectorAll('.image-model-card').length===1"))throw Error('Image search failed');
+  await evaluate("document.getElementById('image-library-search').value='';document.getElementById('image-library-search').dispatchEvent(new Event('input'))");
   shot=await call('Page.captureScreenshot',{format:'png'});await writeFile('/tmp/dedsecai-images.png',Buffer.from(shot.data,'base64'));
   await evaluate("location.hash='chat'");await new Promise(r=>setTimeout(r,400));
   if(!await evaluate("document.getElementById('chat-images').accept.includes('image/png')"))throw Error('Image attachments missing');

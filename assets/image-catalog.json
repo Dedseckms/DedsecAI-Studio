@@ -1,0 +1,58 @@
+{
+  "models": [
+    {
+      "id": "sd-turbo",
+      "name": "SD Turbo · быстрые картинки",
+      "recipe": "sd-turbo",
+      "source": "https://huggingface.co/Green-Sky/SD-Turbo-GGUF",
+      "min_vram_gib": 6,
+      "why": "Быстрый вариант для 512×512; один шаг генерации.",
+      "components": [
+        {
+          "slot": "model",
+          "category": "checkpoints",
+          "file": "sd_turbo-f16-q8_0.gguf",
+          "size": 2023745376,
+          "sha256": "d50be7655f0a554cf8041c145d88b210bd5f3c545423119dee62ae08cae51580",
+          "url": "https://huggingface.co/Green-Sky/SD-Turbo-GGUF/resolve/19a31586d02d64a73b4419bc193b3ecfaf38e1f0/sd_turbo-f16-q8_0.gguf"
+        }
+      ]
+    },
+    {
+      "id": "sd15",
+      "name": "Stable Diffusion 1.5",
+      "recipe": "sd1-checkpoint",
+      "source": "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5",
+      "min_vram_gib": 6,
+      "why": "Универсальная модель 512×512; больше шагов и времени, чем SD Turbo.",
+      "components": [
+        {
+          "slot": "model",
+          "category": "checkpoints",
+          "file": "v1-5-pruned-emaonly.safetensors",
+          "size": 4265146304,
+          "sha256": "6ce0161689b3853acaa03779ec93eafe75a02f4ced659bee03f50797806fa2fa",
+          "url": "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/451f4fe16113bff5a5d2269ed5ad43b0592e9a14/v1-5-pruned-emaonly.safetensors"
+        }
+      ]
+    },
+    {
+      "id": "sdxl-turbo",
+      "name": "SDXL Turbo · больше деталей",
+      "recipe": "sdxl-turbo",
+      "source": "https://huggingface.co/stabilityai/sdxl-turbo",
+      "min_vram_gib": 10,
+      "why": "Более тяжёлая XL-модель; требует больше памяти, чем SD Turbo.",
+      "components": [
+        {
+          "slot": "model",
+          "category": "checkpoints",
+          "file": "sd_xl_turbo_1.0_fp16.safetensors",
+          "size": 6938081905,
+          "sha256": "e869ac7d6942cb327d68d5ed83a40447aadf20e0c3358d98b2cc9e270db0da26",
+          "url": "https://huggingface.co/stabilityai/sdxl-turbo/resolve/71153311d3dbb46851df1931d3ca6e939de83304/sd_xl_turbo_1.0_fp16.safetensors"
+        }
+      ]
+    }
+  ]
+}
