@@ -6,6 +6,9 @@ import json
 from pathlib import Path
 import tarfile
 import time
+import sys
+for stream in (sys.stdout,sys.stderr):
+    if hasattr(stream,"reconfigure"):stream.reconfigure(encoding="utf-8",errors="replace")
 import zipfile
 
 ROOT=Path(__file__).resolve().parent
@@ -69,12 +72,12 @@ Description: Local AI studio with GGUF catalog, chat, memory and hardware profil
     app.append(('usr/share/licenses/dedsecai-studio/LICENSE',(ROOT/'LICENSE').read_bytes(),0o644))
     deb=dest/f'dedsecai-studio_{VERSION}_all.deb';deb.write_bytes(ar([('debian-binary',b'2.0\n'),('control.tar.gz',controltar),('data.tar.gz',tar_bytes(app))]))
     result.append({'file':deb.name,'label':'Debian / Ubuntu · DEB'})
-    previous=json.loads((dest/'manifest.json').read_text()) if (dest/'manifest.json').exists() else {'files':[]}
+    previous=json.loads((dest/'manifest.json').read_text(encoding='utf-8')) if (dest/'manifest.json').exists() else {'files':[]}
     names={r['file'] for r in result}
     for extra in previous['files']:
         if extra['file'] not in names and (dest/extra['file']).exists():result.append(extra)
     for entry in result:entry['sha256']=hashlib.sha256((dest/entry['file']).read_bytes()).hexdigest()
-    (dest/'SHA256SUMS').write_text(''.join(f"{r['sha256']}  {r['file']}\n" for r in result))
-    (dest/'manifest.json').write_text(json.dumps({'version':VERSION,'files':result},ensure_ascii=False,indent=2))
+    (dest/'SHA256SUMS').write_text(''.join(f"{r['sha256']}  {r['file']}\n" for r in result),encoding='utf-8')
+    (dest/'manifest.json').write_text(json.dumps({'version':VERSION,'files':result},ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(result,ensure_ascii=False,indent=2));return result
 if __name__=='__main__':build()
