@@ -12,15 +12,22 @@ def run(data):
  action=data['action']
  with lock():
   if action=='start':manager.start()
-  elif action=='stop':runtime.stop()
+  elif action=='stop':
+   runtime.stop()
+   import imaging
+   imaging.stop()
   elif action=='restart':runtime.stop();manager.start()
-  elif action=='download':manager.download(manager.model(data['id']))
+  elif action=='download':return manager.downloaded(manager.model(data['id']))
+  elif action=='profile':return manager.set_profile(data['id'],data.get('ctx'),data.get('mmproj'))
+  elif action.startswith('image_'):
+   import imaging
+   return imaging.run(action,data)
   elif action=='use':manager.activate(manager.model(data['id']),data.get('allow_cpu') is True)
   elif action=='bench':return manager.benchmark(manager.model(manager.selected()))
   elif action=='hf_download':
-   item=hub.register_repo(data.get('repo'),data.get('variant'),data.get('revision'));manager.download(item);return {'id':item['id']}
+   item=hub.register_repo(data.get('repo'),data.get('variant'),data.get('revision'),data.get('projector'));return manager.downloaded(item)
   elif action=='url_download':
-   item=hub.inspect_url(data.get('url'),data.get('sha256') or None);hub.save_custom(item);manager.download(item);return {'id':item['id']}
+   item=hub.inspect_url(data.get('url'),data.get('sha256') or None);hub.save_custom(item);return manager.downloaded(item)
   elif action=='local_import':return {'id':manager.add(data['path'])['id']}
   elif action=='setup_runtime':return {'executable':bootstrap.setup_runtime(data.get('backend','auto'))}
   elif action=='setup_pi':bootstrap.setup_pi()

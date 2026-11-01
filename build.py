@@ -12,8 +12,8 @@ for stream in (sys.stdout,sys.stderr):
 import zipfile
 
 ROOT=Path(__file__).resolve().parent
-VERSION='0.2.0'
-FILES=['common.py','hardware.py','hub.py','gguf.py','runtime.py','manager.py','moderation.py','desktop.py','bootstrap.py','cli.py','server.py','worker.py','companion.py','build.py','README.md','LICENSE']
+VERSION='0.3.0'
+FILES=['common.py','hardware.py','hub.py','gguf.py','runtime.py','manager.py','moderation.py','desktop.py','bootstrap.py','cli.py','server.py','worker.py','companion.py','imaging.py','build.py','README.md','LICENSE']
 DIRS=['assets','static','pi-extensions','installers','packaging']
 
 def files():
@@ -75,7 +75,7 @@ Description: Local AI studio with GGUF catalog, chat, memory and hardware profil
     previous=json.loads((dest/'manifest.json').read_text(encoding='utf-8')) if (dest/'manifest.json').exists() else {'files':[]}
     names={r['file'] for r in result}
     for extra in previous['files']:
-        if extra['file'] not in names and (dest/extra['file']).exists():result.append(extra)
+        if VERSION in extra['file'] and extra['file'] not in names and (dest/extra['file']).exists():result.append(extra)
     for entry in result:entry['sha256']=hashlib.sha256((dest/entry['file']).read_bytes()).hexdigest()
     (dest/'SHA256SUMS').write_text(''.join(f"{r['sha256']}  {r['file']}\n" for r in result),encoding='utf-8')
     (dest/'manifest.json').write_text(json.dumps({'version':VERSION,'files':result},ensure_ascii=False,indent=2),encoding='utf-8')

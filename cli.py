@@ -68,6 +68,7 @@ def main():
         print('Данные приложения: '+str(APP_HOME))
     elif a.cmd=='serve':
         import server
+        manager.refresh_installed_metadata()
         server.companion.init(recover=True)
         server.ThreadingHTTPServer(('127.0.0.1',server.PORT),server.Handler).serve_forever()
     elif a.cmd=='hardware':print(__import__('json').dumps(__import__('hardware').detect(),ensure_ascii=False,indent=2))

@@ -2,7 +2,7 @@
 const $ = id => document.getElementById(id);
 let state = null, modelSignature = '', lastJob = '', recentSignature = '', polling = false;
 let toastTimer;
-const jobTitles = {chat:'Собеседник отвечает',start:'Запускаем сервер',stop:'Останавливаем сервер',restart:'Перезапускаем сервер',use:'Переключаем модель',download:'Скачиваем и проверяем модель',bench:'Измеряем скорость',choose:'Выбери папку проекта',choose_file:'Выбери GGUF',hf_download:'Скачиваем GGUF из Hugging Face',url_download:'Скачиваем GGUF по ссылке',local_import:'Добавляем локальную модель',setup_runtime:'Устанавливаем llama.cpp',setup_pi:'Устанавливаем Pi',pi:'Открываем Pi'};
+const jobTitles = {profile:'Применяем контекст',image_setup:'Устанавливаем движок изображений',image_start:'Загружаем image-модель',image_stop:'Останавливаем image-сервер',image_generate:'Рисуем изображение',chat:'Собеседник отвечает',start:'Запускаем сервер',stop:'Останавливаем сервер',restart:'Перезапускаем сервер',use:'Переключаем модель',download:'Скачиваем и проверяем модель',bench:'Измеряем скорость',choose:'Выбери папку проекта',choose_file:'Выбери GGUF',hf_download:'Скачиваем GGUF из Hugging Face',url_download:'Скачиваем GGUF по ссылке',local_import:'Добавляем локальную модель',setup_runtime:'Устанавливаем llama.cpp',setup_pi:'Устанавливаем Pi',pi:'Открываем Pi'};
 function toast(message, error = false) { const el=$('toast'); el.textContent=message; el.className='toast'+(error?' error':''); el.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.hidden=true,6000); }
 function node(tag, className, text) { const el=document.createElement(tag); if(className)el.className=className; if(text!==undefined)el.textContent=text; return el; }
 function button(text, callback, cls='secondary') { const el=node('button','button '+cls,text); el.type='button'; el.dataset.jobButton='true'; el.addEventListener('click',callback); return el; }
@@ -28,9 +28,10 @@ function renderModels() {
     card.append(node('h3','',m.name),node('div','model-meta',`${m.gib.toLocaleString('ru-RU')} ГиБ · контекст ${(m.ctx/1024).toLocaleString('ru-RU')}K · KV ${m.cache==='q8_0'?'Q8':'Q4'}`),node('p','model-why',m.why));
     const bottom=node('div','card-bottom'); bottom.append(node('span','model-speed',m.speed));
     if(!m.installed){const b=button(m.disk_fits?'↓ Скачать':'Мало места',()=>action('download',{id:m.id}));b.dataset.diskBlocked=String(!m.disk_fits);bottom.append(b);}
+    else if(m.kind==='image')bottom.append(button('В изображения',()=>action('image_import',{path:m.path})));
     else if(chosen)bottom.append(button('↗ Замерить',()=>action('bench')));
     else {const b=button(m.tier==='too_large'?'Не помещается':m.cpu_risk?'Выбрать с CPU':'Выбрать',()=>action('use',{id:m.id,allow_cpu:m.cpu_risk}),'light');b.dataset.diskBlocked=String(m.tier==='too_large');bottom.append(b);}
-    card.append(bottom); const details=node('details'); details.append(node('summary','','Для каких задач'),node('p','',m.tasks));card.append(details);fragment.append(card);
+    bottom.append(button('Настроить',()=>openProfile(m)));card.append(bottom); const details=node('details'); details.append(node('summary','','Для каких задач'),node('p','',m.tasks));card.append(details);fragment.append(card);
   }
   $('models').replaceChildren(fragment);$('model-count').textContent=state.models.length;document.getElementById('catalog-count').textContent=visibleCount+' из '+state.models.length;
 }
@@ -42,17 +43,17 @@ function renderProjects() {
   $('recent-projects').replaceChildren(fragment);
 }
 function disableActions() {
-  const busy=state?.job?.status==='running';
-  for(const id of ['start','stop','restart','choose-folder','launch-pi'])$(id).disabled=busy;
-  $('start').disabled=busy||state.running;$('stop').disabled=busy||!state.running;$('restart').disabled=busy||!state.running;
-  for(const b of document.querySelectorAll('[data-job-button]'))b.disabled=busy||b.dataset.diskBlocked==='true';
+  const busy=['running','cancelling'].includes(state?.job?.status);
+  for(const id of ['choose-folder','launch-pi'])$(id).disabled=busy;
+  $('start').disabled=busy||state.running;$('stop').disabled=false;$('restart').disabled=false;
+  for(const b of document.querySelectorAll('[data-job-button]'))b.disabled=b.dataset.diskBlocked==='true';
 }
 function renderJob() {
-  const j=state.job;$('operation').hidden=!j;if(!j)return;
-  const running=j.status==='running';$('job-title').textContent=running?jobTitles[j.action]:j.status==='error'?'Операция не завершена':'Готово';
+  const j=state.job;$('operation').hidden=!j||(!['running','cancelling'].includes(j.status)&&Date.now()/1000-(j.finished||0)>15);if(!j)return;
+  const running=['running','cancelling'].includes(j.status);$('job-title').textContent=running?jobTitles[j.action]:j.status==='error'?'Операция не завершена':j.status==='cancelled'?'Отменено':'Готово';
   $('job-dot').className='pulse'+(running?'':j.status==='error'?' error':' done');
   $('job-time').textContent=Math.round((j.finished||Date.now()/1000)-j.started)+' с';
-  $('job-message').textContent=j.error||(running?'Можно оставить эту страницу открытой — состояние обновляется автоматически.':j.result?.message||'Операция завершена.');
+  $('job-message').textContent=j.error||(running?'Можно остановить операцию или выбрать другую модель.':j.result?.message||'Операция завершена.');
   $('job-log').textContent=state.operation_log||'Журнал пока пуст.';
   const key=j.id+':'+j.status;
   if(key!==lastJob && !running) {

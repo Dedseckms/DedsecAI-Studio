@@ -1,5 +1,7 @@
 """Durable local chat, explicit personal memory and lexical recall. No training."""
 import contextlib
+import base64
+import binascii
 import datetime
 import json
 import os
@@ -12,7 +14,7 @@ import threading
 import time
 import urllib.request
 import moderation
-from common import APP_HOME, SERVER_PORT
+from common import APP_HOME, SERVER_PORT,CONFIG,read_json,write_json
 
 HOME = Path.home()
 DATA = Path(os.environ.get('DEDSECAI_COMPANION_DATA_DIR', APP_HOME / 'companion'))
@@ -21,6 +23,7 @@ SCHEMA = '''
 CREATE TABLE IF NOT EXISTS conversations(id TEXT PRIMARY KEY,title TEXT NOT NULL,created TEXT NOT NULL,updated TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS messages(id INTEGER PRIMARY KEY,conversation TEXT NOT NULL REFERENCES conversations(id),role TEXT NOT NULL CHECK(role IN ('user','assistant')),content TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'done',model TEXT,created TEXT NOT NULL,sources TEXT NOT NULL DEFAULT '[]',error TEXT);
 CREATE TABLE IF NOT EXISTS memories(id INTEGER PRIMARY KEY,content TEXT NOT NULL,created TEXT NOT NULL,updated TEXT NOT NULL,source_message INTEGER);
+CREATE TABLE IF NOT EXISTS attachments(id TEXT PRIMARY KEY,message INTEGER NOT NULL REFERENCES messages(id),mime TEXT NOT NULL,data BLOB NOT NULL);
 CREATE VIRTUAL TABLE IF NOT EXISTS message_search USING fts5(content,content='messages',content_rowid='id');
 CREATE TRIGGER IF NOT EXISTS messages_ai AFTER INSERT ON messages BEGIN INSERT INTO message_search(rowid,content) VALUES(new.id,new.content); END;
 CREATE TRIGGER IF NOT EXISTS messages_au AFTER UPDATE OF content ON messages BEGIN INSERT INTO message_search(message_search,rowid,content) VALUES('delete',old.id,old.content); INSERT INTO message_search(rowid,content) VALUES(new.id,new.content); END;
@@ -48,6 +51,10 @@ def init(recover=False):
     with db() as con:
         con.execute('PRAGMA journal_mode=WAL')
         con.executescript(SCHEMA)
+        columns={r[1] for r in con.execute('PRAGMA table_info(memories)')}
+        if 'memory_key' not in columns:con.execute('ALTER TABLE memories ADD COLUMN memory_key TEXT')
+        if 'automatic' not in columns:con.execute('ALTER TABLE memories ADD COLUMN automatic INTEGER NOT NULL DEFAULT 0')
+        con.execute('CREATE TABLE IF NOT EXISTS memory_history(id INTEGER PRIMARY KEY,memory_id INTEGER,content TEXT,changed TEXT)')
         # Interrupted responses remain visible, but never become conversational context.
         if recover:con.execute("UPDATE messages SET status='interrupted' WHERE status='generating'")
     DB_PATH.chmod(0o600)
@@ -76,7 +83,7 @@ def overview(ident=None):
         if ident:
             conversation(ident)
             for r in con.execute('SELECT * FROM messages WHERE conversation=? ORDER BY id',(ident,)):
-                row=dict(r);row['sources']=json.loads(row['sources']);messages.append(row)
+                row=dict(r);row['sources']=json.loads(row['sources']);row['images']=[dict(a) for a in con.execute('SELECT id,mime FROM attachments WHERE message=?',(row['id'],))];messages.append(row)
     return dict(conversations=rows,messages=messages)
 
 
@@ -92,7 +99,7 @@ def save_memory(content,ident=None,source=None):
     with db() as con:
         if ident is not None:
             if not isinstance(ident,int):raise ValueError('Неверная запись памяти.')
-            cursor=con.execute('UPDATE memories SET content=?,updated=? WHERE id=?',(content,date,ident))
+            cursor=con.execute('UPDATE memories SET content=?,updated=?,automatic=0 WHERE id=?',(content,date,ident))
             if not cursor.rowcount:raise ValueError('Запись не найдена.')
         else:
             old=con.execute('SELECT id FROM memories WHERE content=?',(content,)).fetchone()
@@ -128,10 +135,12 @@ class ChatEngine:
                 try:response.fp.raw._sock.shutdown(socket.SHUT_RDWR)
                 except (AttributeError,OSError):pass
 
-    def prepare(self,ident,text):
+    def prepare(self,ident,text,images=None):
         conversation(ident)
         if not isinstance(text,str) or not 1<=len(text.strip())<=8000:
             raise ValueError('Сообщение должно содержать от 1 до 8000 символов.')
+        checked=validate_images(images or [])
+        if checked and not self.manager.model(self.manager.selected()).get('mmproj'):raise ValueError('Выберите vision-модель и укажите её mmproj в настройках модели.')
         self.stop_event.clear()
         text=text.strip();date=now()
         policy=moderation.effective(self.manager.selected())
@@ -140,12 +149,14 @@ class ChatEngine:
         with db() as con:
             count=con.execute('SELECT count(*) FROM messages WHERE conversation=?',(ident,)).fetchone()[0]
             user=con.execute("INSERT INTO messages(conversation,role,content,created) VALUES(?,'user',?,?)",(ident,text,date)).lastrowid
+            for mime,raw in checked:con.execute('INSERT INTO attachments VALUES(?,?,?,?)',(secrets.token_hex(16),user,mime,raw))
             title=text.replace('\n',' ')[:65]
             if count==0:con.execute('UPDATE conversations SET title=? WHERE id=?',(title,ident))
             con.execute('UPDATE conversations SET updated=? WHERE id=?',(date,ident))
             assistant=con.execute("INSERT INTO messages(conversation,role,status,created) VALUES(?,'assistant','generating',?)",(ident,date)).lastrowid
         explicit=re.match(r'(?is)^запомни\s*[:—,-]?\s+(.{3,2000})$',text)
         if explicit:save_memory(explicit.group(1),source=user)
+        elif read_json(CONFIG/'memory.json',{}).get('automatic',True):auto_remember(text,user)
         return dict(conversation=ident,user=user,assistant=assistant,text=text)
 
     def context(self,task,item):
@@ -169,10 +180,11 @@ class ChatEngine:
         max_output=min(1536,item['ctx']//4)
         system+=moderation.instruction(moderation.effective(item['id']))
         while True:
-            messages=[{'role':'system','content':system}]+[{'role':r['role'],'content':r['content']} for r in history]
-            prompt=self.manager.api('/apply-template',{'messages':messages},timeout=10)['prompt']
+            messages=[{'role':'system','content':system}]+[{'role':r['role'],'content':message_content(r,item)} for r in history]
+            prompt=self.manager.api('/apply-template',{'messages':[{'role':m['role'],'content':m['content'] if isinstance(m['content'],str) else '\n'.join(p.get('text','[image]') for p in m['content'])} for m in messages]},timeout=10)['prompt']
             tokens=len(self.manager.api('/tokenize',{'content':prompt},timeout=10)['tokens'])
-            if tokens+max_output+256<=item['ctx']:break
+            image_reserve=sum(len(r.get('images',[]))*4096 for r in history)
+            if tokens+image_reserve+max_output+256<=item['ctx']:break
             if len(history)<=1:raise ValueError('Сообщение вместе с памятью не помещается в окно этой модели. Сократи сообщение или выбери большее окно.')
             history.pop(0)
             while len(history)>1 and history[0]['role']!='user':history.pop(0)
@@ -186,8 +198,8 @@ class ChatEngine:
                 policy=moderation.effective(item['id']);buffered=moderation.buffered(policy)
                 try:self.manager.api('/health')
                 except OSError:
-                    self.manager.start()
-                self.manager.wait_ready(item)
+                    self.manager.start(cancel=self.stop_event)
+                self.manager.wait_ready(item,150,self.stop_event)
                 messages,sources,max_output=self.context(task,item)
                 with db() as con:
                     con.execute('UPDATE messages SET model=?,sources=? WHERE id=?',(item['alias'],json.dumps(sources,ensure_ascii=False),task['assistant']))
@@ -230,3 +242,64 @@ class ChatEngine:
                 con.execute('UPDATE messages SET content=?,status=?,error=? WHERE id=?',(content,status,error,task['assistant']))
                 con.execute('UPDATE conversations SET updated=? WHERE id=?',(now(),task['conversation']))
         return dict(conversation=task['conversation'],message=task['assistant'],status=status,error=error,sources=sources)
+
+
+def validate_images(images):
+    if not isinstance(images,list) or len(images)>4:raise ValueError('Можно прикрепить до 4 изображений.')
+    result=[]
+    for value in images:
+        if not isinstance(value,str) or len(value)>8*1024*1024:raise ValueError('Изображение слишком большое (до 6 МиБ).')
+        match=re.fullmatch(r'data:(image/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)',value)
+        if not match:raise ValueError('Поддерживаются PNG, JPEG и WebP.')
+        try:raw=base64.b64decode(match[2],validate=True)
+        except binascii.Error:raise ValueError('Повреждённое изображение.')
+        mime=match[1]
+        valid=(mime=='image/png' and raw.startswith(b'\x89PNG\r\n\x1a\n')) or (mime=='image/jpeg' and raw.startswith(b'\xff\xd8\xff')) or (mime=='image/webp' and raw.startswith(b'RIFF') and raw[8:12]==b'WEBP')
+        if not valid:raise ValueError('Формат изображения не соответствует содержимому.')
+        result.append((mime,raw))
+    return result
+
+
+def attachment(ident):
+    if not re.fullmatch('[a-f0-9]{32}',ident):raise ValueError('Изображение не найдено.')
+    with db() as con:
+        row=con.execute('SELECT mime,data FROM attachments WHERE id=?',(ident,)).fetchone()
+        if row is None:raise ValueError('Изображение не найдено.')
+        return row['mime'],row['data']
+
+
+def message_content(row,item):
+    if not row.get('images') or not item.get('mmproj'):return row['content']
+    parts=[{'type':'text','text':row['content']}]
+    for a in row['images']:
+        mime,raw=attachment(a['id'])
+        parts.append({'type':'image_url','image_url':{'url':'data:'+mime+';base64,'+base64.b64encode(raw).decode()}})
+    return parts
+
+
+# Conservative extraction: preserve the user's own words, never assistant guesses.
+# A typed key lets a later correction replace a former preference without deleting history.
+def auto_remember(text,source):
+    if len(text)>1500 or re.search(r'(?i)парол|password|api.?key|токен|секрет|представь|допустим|например|персонаж|выдум|если бы|\bsecret\b',text):return
+    patterns=[('name',r'(?:меня зовут|мо[её] имя)\s+[^.!?\n]{2,80}'),
+              ('location',r'я живу в\s+[^.!?\n]{2,100}'),
+              ('work',r'я работаю (?:в|на|как|над)\s+[^.!?\n]{2,160}'),
+              ('language',r'(?:отвечай|пиши|говори)(?: мне)? (?:только )?на (?:русском|английском|украинском|немецком)(?: языке)?'),
+              ('style',r'(?:я предпочитаю|мне нравятся|мне нравится|я люблю|я не люблю)\s+[^.!?\n]{3,180}'),
+              ('code',r'я (?:пишу|программирую) на\s+[^.!?\n]{2,100}')]
+    for kind,pattern in patterns:
+        match=re.search(r'(?i)(?<!\w)'+pattern,text)
+        if not match:continue
+        # Do not learn questions or quoted examples.
+        sentence=re.split(r'[.!?\n]',text)[0]
+        if '?' in text or any(c in text for c in ['«','»','"']):continue
+        fact=match[0].strip()
+        key='auto:'+kind
+        if kind=='style':key+=':'+re.sub(r'\W+',' ',fact.lower()).strip()
+        with db() as con:
+            old=con.execute('SELECT id,automatic FROM memories WHERE memory_key=?',(key,)).fetchone()
+            if old and not old['automatic']:continue
+            if old:
+                con.execute('INSERT INTO memory_history(memory_id,content,changed) SELECT id,content,? FROM memories WHERE id=?',(now(),old['id']))
+                con.execute('UPDATE memories SET content=?,updated=?,source_message=? WHERE id=?',(fact,now(),source,old['id']))
+            else:con.execute('INSERT INTO memories(content,created,updated,source_message,memory_key,automatic) VALUES(?,?,?,?,?,1)',(fact,now(),now(),source,key))

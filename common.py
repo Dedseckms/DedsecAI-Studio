@@ -9,7 +9,7 @@ import sys
 for _stream in (sys.stdin,sys.stdout,sys.stderr):
     if hasattr(_stream,"reconfigure"):_stream.reconfigure(encoding="utf-8",errors="replace")
 
-VERSION='0.2.0'
+VERSION='0.3.0'
 HOME=Path.home()
 ROOT=Path(__file__).resolve().parent
 if os.name=='nt':

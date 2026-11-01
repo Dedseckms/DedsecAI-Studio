@@ -35,5 +35,18 @@ try {
   if(!await evaluate("document.querySelectorAll('.hardware-card').length===4"))throw Error('Hardware missing');
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   if(!await evaluate('document.documentElement.scrollWidth<=innerWidth'))throw Error('Mobile overflow');
+  await call('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
+  await evaluate("document.getElementById('family-filter').value='';document.getElementById('family-filter').dispatchEvent(new Event('change'));location.hash='overview'");
+  await evaluate("openProfile(state.models.find(x=>x.native_ctx>=32768))");
+  if(!await evaluate("document.getElementById('profile-dialog').open&&Number(document.getElementById('profile-context').max)>=32768"))throw Error('Context controls missing');
+  shot=await call('Page.captureScreenshot',{format:'png'});await writeFile('/tmp/dedsecai-context.png',Buffer.from(shot.data,'base64'));
+  await evaluate("document.getElementById('profile-close').click();location.hash='images'");await new Promise(r=>setTimeout(r,600));
+  if(!await evaluate("!document.getElementById('images-view').hidden&&document.getElementById('overview').hidden"))throw Error('Image route failed');
+  shot=await call('Page.captureScreenshot',{format:'png'});await writeFile('/tmp/dedsecai-images.png',Buffer.from(shot.data,'base64'));
+  await evaluate("location.hash='chat'");await new Promise(r=>setTimeout(r,400));
+  if(!await evaluate("document.getElementById('chat-images').accept.includes('image/png')"))throw Error('Image attachments missing');
+  shot=await call('Page.captureScreenshot',{format:'png'});await writeFile('/tmp/dedsecai-chat-next.png',Buffer.from(shot.data,'base64'));
+  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  for(const route of ['chat','images','memory','system','overview']){await evaluate("location.hash="+JSON.stringify(route));await new Promise(r=>setTimeout(r,150));if(!await evaluate('document.documentElement.scrollWidth<=innerWidth'))throw Error('Mobile overflow on '+route);}
   console.log(JSON.stringify({branding:true,catalog:true,kimiTooLarge:true,hfVariants:true,filterSettings:true,hardware:true,mobileOverflow:false}));
 }finally{if(ws)ws.close();chrome.kill('SIGTERM');await log.close();}

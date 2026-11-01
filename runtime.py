@@ -36,15 +36,18 @@ def unit(*args,check=True):
 
 def arguments(item):
     from manager import file_path
-    return [binary(),'-m',str(file_path(item)),'--alias',item['alias'],'-c',str(item['ctx']),'-ngl',str(item['gpu_layers']),
+    args=[binary(),'-m',str(file_path(item)),'--alias',item['alias'],'-c',str(item['ctx']),'-ngl',str(item['gpu_layers']),
             '--fit-target','768','-fa','on','--cache-type-k',item['cache'],'--cache-type-v',item['cache'],
             '-t',str(item.get('threads',max(1,(os.cpu_count() or 2)//2))),'-ub',str(item['ubatch']),'--parallel','1',
             '--host','127.0.0.1','--port',str(SERVER_PORT),'--jinja','--reasoning','off','--no-reasoning-preserve',
             '--chat-template-kwargs','{"enable_thinking":false}','--temp','0.6','--top-p','0.95','--repeat-penalty','1.0','--dry-multiplier','0']
+    if item.get('mmproj'):args.extend(['--mmproj',item['mmproj']])
+    return args
 
-def wait_ready(item,seconds=150):
+def wait_ready(item,seconds=150,cancel=None):
     end=time.monotonic()+seconds
     while time.monotonic()<end:
+        if cancel is not None and cancel.is_set():raise InterruptedError('Загрузка отменена.')
         try:
             api('/health');props=api('/props');names=[r['id'] for r in api('/v1/models')['data']]
             ctx=props['default_generation_settings']['n_ctx']
@@ -53,14 +56,16 @@ def wait_ready(item,seconds=150):
         except (OSError,KeyError):time.sleep(.5)
     raise ValueError('Модель не загрузилась вовремя. Проверьте журнал сервера и уменьшите контекст.')
 
-def start(item,foreground=False):
+def start(item,foreground=False,cancel=None):
+    import imaging
+    imaging.stop()
     if healthy():
         wait_ready(item,3);return
     if foreground:
         write_json(STATE/'server-process.json',{'pid':os.getpid(),'executable':binary(),'model':str(item['id'])})
         os.execv(binary(),arguments(item))
-    if legacy():
-        unit('reset-failed',check=False);unit('start')
+    if legacy() and not item.get('mmproj'):
+        unit('reset-failed',check=False);unit('start');write_json(STATE/'server-mode.json',{'mode':'legacy'})
     else:
         args=arguments(item)
         with (STATE/'server.log').open('ab') as out:
@@ -68,11 +73,12 @@ def start(item,foreground=False):
             if os.name=='nt':opts['creationflags']=subprocess.CREATE_NEW_PROCESS_GROUP|subprocess.CREATE_NO_WINDOW
             else:opts['start_new_session']=True
             p=subprocess.Popen(args,**opts)
+        write_json(STATE/'server-mode.json',{'mode':'portable'})
         write_json(STATE/'server-process.json',{'pid':p.pid,'executable':args[0],'model':item['id']})
-    wait_ready(item)
+    wait_ready(item,cancel=cancel)
 
 def stop():
-    if legacy():unit('stop');return
+    if legacy():unit('stop')
     record=read_json(STATE/'server-process.json',{});pid=record.get('pid')
     if not pid:
         if healthy():raise ValueError('На порту работает внешний сервер. Остановите его отдельно; приложение не завершает чужие процессы.')

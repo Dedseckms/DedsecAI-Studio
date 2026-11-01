@@ -64,11 +64,11 @@ def repo_id(value):
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*',value):raise ValueError('Формат репозитория: owner/name.')
     return value
 
-def groups(siblings):
+def groups(siblings,projectors=False):
     single=[];split={}
     for row in siblings:
         name=row['rfilename']
-        if not name.lower().endswith('.gguf') or Path(name).name.lower().startswith('mmproj'):continue
+        if not name.lower().endswith('.gguf') or Path(name).name.lower().startswith('mmproj')!=projectors:continue
         leaf=Path(name).name
         if any(x in leaf for x in ['\\',':','\0']) or leaf in {'.','..'}:continue
         f={'name':leaf,'remote_path':name,'size':row.get('size') or row.get('lfs',{}).get('size',0),'sha256':row.get('lfs',{}).get('sha256')}
@@ -87,7 +87,7 @@ def inspect_repo(value,revision=None):
     suffix=('/revision/'+urllib.parse.quote(revision,safe='')) if revision else ''
     d=get_json('https://huggingface.co/api/models/'+repo+suffix+'?blobs=true')
     variants=groups(d.get('siblings',[]))
-    return {'repo':repo,'revision':d['sha'],'source':'https://huggingface.co/'+repo,'variants':variants,'license':d.get('cardData',{}).get('license','уточните в карточке модели')}
+    return {'repo':repo,'revision':d['sha'],'source':'https://huggingface.co/'+repo,'variants':variants,'projectors':groups(d.get('siblings',[]),True),'license':d.get('cardData',{}).get('license','уточните в карточке модели')}
 
 def search_repos(query):
     if not isinstance(query,str) or not 2<=len(query.strip())<=100:raise ValueError('Введите от 2 до 100 символов.')
@@ -100,11 +100,15 @@ def from_variant(repo,revision,variant,name=None,family='Custom'):
     return dict(id=ident,name=name or Path(variant['variant']).name.removesuffix('.gguf'),family=family,repo=repo,revision=revision,files=variant['files'],
                 file=variant['files'][0]['name'],size=variant['size'],alias=ident,native_ctx=32768,source='https://huggingface.co/'+repo,tasks='GGUF из Hugging Face. Совместимость chat template и инструментов нужно проверить.')
 
-def register_repo(repo,variant,revision=None):
+def register_repo(repo,variant,revision=None,projector=None):
     info=inspect_repo(repo,revision)
     row=next((v for v in info['variants'] if v['variant']==variant),None)
     if not row:raise ValueError('Вариант GGUF не найден. Обновите список файлов.')
     item=from_variant(info['repo'],info['revision'],row)
+    if projector:
+        proj=next((p for p in info['projectors'] if p['variant']==projector),None)
+        if not proj:raise ValueError('Проектор не найден в репозитории.')
+        item['projector_download']=proj
     save_custom(item);return item
 
 def save_custom(item):
@@ -188,5 +192,5 @@ def download(item):
         f['sha256_computed']=digest;f['verified']=bool(f.get('sha256'));f['size']=part.stat().st_size
         os.replace(part,dest)
     item['size']=sum(f['size'] for _,f in files);item['files']=[f for _,f in files]
-    save_custom(item)
+    if not item.get('artifact'):save_custom(item)
     print('Все части GGUF установлены. '+('SHA-256 подтверждён источником.' if all(f.get('verified') for _,f in files) else 'Для части файлов источник не предоставил контрольную сумму; хеш рассчитан локально.'),flush=True)

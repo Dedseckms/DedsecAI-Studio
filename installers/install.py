@@ -13,7 +13,7 @@ SOURCE=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(SOURCE))
 from common import APP_HOME,HOME,STATE,VERSION,write_json
 
-FILES=['common.py','hardware.py','hub.py','gguf.py','runtime.py','manager.py','moderation.py','desktop.py','bootstrap.py','cli.py','server.py','worker.py','companion.py','build.py','README.md','LICENSE']
+FILES=['common.py','hardware.py','hub.py','gguf.py','runtime.py','manager.py','moderation.py','desktop.py','bootstrap.py','cli.py','server.py','worker.py','companion.py','imaging.py','build.py','README.md','LICENSE']
 DIRS=['assets','static','pi-extensions','installers','packaging']
 
 def quote(value):return '"'+str(value).replace('\\','\\\\').replace('"','\\"').replace('%','%%')+'"'

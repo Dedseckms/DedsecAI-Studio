@@ -35,7 +35,13 @@ def catalog():
     hw=hardware.detect();rows=[]
     for raw in raw_catalog():
         row=copy.deepcopy(raw);profile=hardware.plan(row,hw);row.update(profile)
-        row['assessment']=profile;rows.append(row)
+        row['assessment']=profile
+        override=read_json(CONFIG/'profiles.json',{}).get(row['id'],{})
+        if override.get('ctx'):
+            row['ctx']=override['ctx'];row['custom_ctx']=True
+        if 'mmproj' in override:row['mmproj']=override['mmproj']
+        if row.get('custom_ctx'):row['why']+=' Размер контекста задан вручную; расход памяти может превышать автоматический профиль.'
+        rows.append(row)
     return rows
 
 def model(ident):
@@ -60,7 +66,9 @@ def speed(item):
 
 def update_metadata(item):
     info=gguf_info(file_path(item));arch=info.get('general.architecture','')
-    item['architecture']=arch;item['native_ctx']=int(info.get(arch+'.context_length',32768))
+    item['architecture']=arch
+    if 'image' in arch or arch in {'flux','flux2','sd1','sd2','sdxl','sd3','stable-diffusion','hidream'}:item['kind']='image'
+    item['native_ctx']=int(info.get(arch+'.context_length',32768))
     # MLA/SSM/hybrid caches are not the ordinary GQA cache; leave their estimate marked unknown.
     if arch in {'qwen2','qwen3','llama','phi3','gemma','gemma2'}:
         n=info.get(arch+'.block_count');h=info.get(arch+'.attention.head_count_kv');d=info.get(arch+'.attention.key_length')
@@ -70,6 +78,9 @@ def update_metadata(item):
 
 def download(item):
     hub.download(item)
+    if item.get('projector_download'):
+        proj=item['projector_download'];artifact=dict(id=item['id'],files=proj['files'],file=proj['files'][0]['name'],size=proj['size'],repo=item['repo'],revision=item['revision'],artifact=True)
+        hub.download(artifact);item['mmproj']=str(hub.paths(artifact)[0][0]);hub.save_custom(item)
     if installed(item):
         update_metadata(item)
     return item
@@ -100,6 +111,7 @@ def sync_pi(item):
     write_json(path,data)
 
 def activate(item,allow_cpu=False):
+    if item.get('kind')=='image':raise ValueError('Это генератор изображений. Откройте вкладку «Изображения».')
     if not installed(item):raise ValueError('Сначала скачайте или импортируйте модель.')
     if item['tier']=='too_large':raise ValueError('Модель слишком велика по оценке RAM/VRAM этого ПК. Выберите меньшую квантовку или модель.')
     if item['cpu_risk'] and not allow_cpu:raise ValueError('Этот профиль использует CPU. Подтвердите выбор варианта с CPU.')
@@ -121,10 +133,10 @@ def activate(item,allow_cpu=False):
     print('Модель готова: '+item['name'],flush=True)
     return item
 
-def start(foreground=False):
+def start(foreground=False,cancel=None):
     item=model(selected())
     if not installed(item):raise ValueError('Выбранная модель не установлена.')
-    runtime.start(item,foreground)
+    runtime.start(item,foreground,cancel)
 
 def benchmark(item,tokens=192):
     wait_ready(item,5)
@@ -185,4 +197,59 @@ def migrate():
     write_json(CONFIG/'migration.json',{'done':True,'originals_preserved':True})
 
 def server_log():
+    if read_json(STATE/'server-mode.json',{}).get('mode')=='portable':return STATE/'server.log'
     return Path(read_json(CONFIG/'legacy.json',{}).get('log',STATE/'server.log'))
+
+
+def set_profile(ident,ctx,mmproj=None):
+    item=model(ident)
+    if isinstance(ctx,bool) or not isinstance(ctx,int) or not 512<=ctx<=int(item.get('native_ctx',32768)):
+        raise ValueError('Контекст: от 512 до '+str(item.get('native_ctx',32768))+' токенов (предел модели).')
+    rows=read_json(CONFIG/'profiles.json',{});entry=rows.setdefault(ident,{})
+    entry['ctx']=ctx
+    if mmproj is not None:
+        if not isinstance(mmproj,str):raise ValueError('Укажите путь к mmproj строкой.')
+        if mmproj:
+            path=Path(mmproj).expanduser().resolve(strict=True)
+            if path.suffix.lower()!='.gguf' or not path.is_file():raise ValueError('Проектор должен быть файлом GGUF.')
+            gguf_info(path);entry['mmproj']=str(path)
+        else:entry['mmproj']=''
+    write_json(CONFIG/'profiles.json',rows)
+    item=model(ident)
+    if selected()==ident:
+        runtime.stop();environment(item);runtime.start(item);sync_pi(item)
+    return {'message':'Профиль сохранён. Контекст: '+str(ctx)}
+
+
+def downloaded(item):
+    download(item)
+    result={'id':item['id'],'message':'Модель скачана и проверена.'}
+    item=model(item['id'])
+    if item.get('kind')=='image':
+        import imaging
+        return imaging.import_model(str(file_path(item)))
+    if item['tier']=='too_large':
+        result['message']+=' Автозамер пропущен: профиль превышает память ПК.'
+        return result
+    previous=selected();running=runtime.healthy()
+    try:
+        activate(item,allow_cpu=True);result['benchmark']=benchmark(item)
+        result['message']+=' Скорость измерена автоматически.'
+    except Exception as exc:result['message']+=' Автозамер не выполнен: '+str(exc)
+    finally:
+        if previous and previous!=item['id']:
+            runtime.stop();environment(model(previous))
+            if running:runtime.start(model(previous))
+            sync_pi(model(previous))
+    return result
+
+
+def refresh_installed_metadata():
+    from common import VERSION
+    marker=read_json(STATE/'metadata-version.json',{})
+    if marker.get('version')==VERSION:return
+    for item in raw_catalog():
+        if installed(item):
+            try:update_metadata(item)
+            except (ValueError,OSError) as exc:print('Не удалось уточнить метаданные '+item['id']+': '+str(exc),flush=True)
+    write_json(STATE/'metadata-version.json',{'version':VERSION})
