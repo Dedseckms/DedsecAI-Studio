@@ -161,7 +161,12 @@ class ChatEngine:
 
     def context(self,task,item):
         rows=overview(task['conversation'])['messages']
-        history=[r for r in rows if r['status']=='done'][-32:]
+        history=[];characters=0
+        for row in reversed(rows):
+            if row['status']!='done':continue
+            if history and characters+len(row['content'])>item['ctx']*4:break
+            history.append(row);characters+=len(row['content'])
+        history.reverse()
         source=[r for r in search(task['text'],exclude=[r['id'] for r in history],limit=10) if r['role']=='user'][:4]
         memory_limit=min(6000,item['ctx']//2)
         notes='\n'.join('['+r['updated']+'] '+r['content'] for r in memories())[:memory_limit]
@@ -177,7 +182,7 @@ class ChatEngine:
                 'Ты не имеешь доступа к файлам компьютера и не должен утверждать, что выполнил команды.\n'
                 'ПОСТОЯННАЯ ПАМЯТЬ:\n'+(notes or 'Пока нет записей.')+'\n'
                 'НАЙДЕНО В ПРОШЛЫХ РАЗГОВОРАХ:\n'+(recall or 'Совпадений нет.'))
-        max_output=min(1536,item['ctx']//4)
+        max_output=min(4096,item['ctx']//4)
         system+=moderation.instruction(moderation.effective(item['id']))
         while True:
             messages=[{'role':'system','content':system}]+[{'role':r['role'],'content':message_content(r,item)} for r in history]
