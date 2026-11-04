@@ -27,6 +27,14 @@ jobs:
           python -m pip install zstandard==0.25.0
       - name: Build six packages and checksums
         run: python build_release.py
+      - name: Install DEB and start installed Ubuntu panel
+        run: |
+          sudo apt-get install -y --no-install-recommends ./dist/dedsecai-studio_*_all.deb
+          /usr/bin/dedsecai --version
+          DEDSECAI_TEST_APP=/opt/dedsecai-studio python -m unittest discover -s tests -p test_startup.py -v
+      - name: Validate Arch package metadata
+        run: |
+          docker run --rm -v "$PWD/dist:/packages:ro" archlinux:base bash -lc 'pacman -Qip /packages/*.pkg.tar.zst && pacman -Qlp /packages/*.pkg.tar.zst'
       - uses: actions/upload-artifact@v4
         with:
           name: release-packages
