@@ -1,30 +1,129 @@
-<p align="center"><img src="static/brand.svg" width="110" alt="DedsecAI Studio: двоичная D"></p>
+<p align="center">
+  <img src="assets/readme/banner.svg" width="100%" alt="DedsecAI Studio — локальные модели, код, изображения и память" />
+</p>
 
-# DedsecAI Studio 0.4.1
+<p align="center">
+  <strong>Локальная AI-мастерская под твой компьютер.</strong><br />
+  Общайся с моделями, пиши код в Pi и создавай изображения в одном интерфейсе.
+</p>
 
-**Скачать установщик:** [Windows EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/DedsecAI-Studio-0.4.1-Setup.exe) · [Arch Linux](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio-0.4.1-1-any.pkg.tar.zst) · [Debian/Ubuntu](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio_0.4.1_all.deb) · [Все файлы и SHA-256](https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.1).
+<p align="center">
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/latest"><img src="https://img.shields.io/github/v/release/Dedseckms/DedsecAI-Studio?include_prereleases&amp;style=for-the-badge&amp;label=RELEASE&amp;color=7fffc1&amp;labelColor=101b21" alt="Последняя версия" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Dedseckms/DedsecAI-Studio/ci.yml?branch=main&amp;style=for-the-badge&amp;label=CI&amp;labelColor=101b21" alt="Статус проверок Linux и Windows" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-7fffc1?style=for-the-badge&amp;labelColor=101b21" alt="Код Studio: лицензия MIT" /></a>
+  <a href="#installation"><img src="https://img.shields.io/badge/PYTHON-3.10%2B-8fbaff?style=for-the-badge&amp;labelColor=101b21" alt="Python 3.10 или новее" /></a>
+</p>
 
-Предварительный релиз. Windows EXE собран и проверен на целостность; полная установка на Windows/Debian ещё требует приёмочной проверки. EXE не подписан. Для установки runtime/Pi нужен интернет; веса моделей скачиваются отдельно.
+<p align="center">
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/stargazers"><img src="https://img.shields.io/github/stars/Dedseckms/DedsecAI-Studio?style=flat-square&amp;label=Stars&amp;color=7fffc1&amp;labelColor=101b21" alt="Звёзды GitHub" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/forks"><img src="https://img.shields.io/github/forks/Dedseckms/DedsecAI-Studio?style=flat-square&amp;label=Forks&amp;color=7fffc1&amp;labelColor=101b21" alt="Форки GitHub" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases"><img src="https://img.shields.io/github/downloads/Dedseckms/DedsecAI-Studio/total?style=flat-square&amp;label=Downloads&amp;color=7fffc1&amp;labelColor=101b21" alt="Скачивания файлов релизов" /></a>
+</p>
 
-Локальный веб-собеседник, постоянная память, управление llama.cpp и запуск Pi в папке проекта.
-Python 3.10+, Windows 10/11, Arch Linux и Debian/Ubuntu. Интерфейс: http://127.0.0.1:1236.
+<p align="center">
+  <a href="#download">Скачать</a> · <a href="#screenshots">Скриншоты</a> · <a href="#installation">Установка</a> · <a href="#guide">Руководство</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/issues/new/choose">Предложить улучшение</a>
+</p>
 
-## Возможности
+<a id="download"></a>
 
-- Автоопределение CPU, RAM, GPU/VRAM и свободного диска. План профиля и пояснение ограничений для каждого ПК.
-- Каталог из 36 подтверждённых вариантов Qwen, DeepSeek, GLM, Kimi, Gemma, Llama, Mistral, Phi.
-- Поиск Hugging Face, выбор квантовки, докачка и SHA-256 при наличии ожидаемого хеша.
-- Split GGUF: суммируются размеры, загружаются все части; локальный импорт проверяет наличие всех частей.
-- Импорт собственного GGUF без копирования и загрузка по HTTPS-ссылке на один GGUF.
-- Настраиваемый контекст для каждой модели; значение сохраняется и передаётся в Pi.
-- Остановка и смена модели прерывают зависшую загрузку или ответ; отдельные журналы операций.
-- Автозамер скорости после скачивания текстовой модели; прежняя активная модель затем восстанавливается.
-- Vision: картинки в переписке, выбор и скачивание mmproj из Hugging Face, настройка локального проектора.
-- Генерация изображений: отдельный stable-diffusion.cpp, рецепты SD/SDXL/FLUX/Qwen Image и другие, выбор компонентов, загрузка весов, PNG-галерея и автотест при загрузке модели.
-- Терминальный интерфейс, анимации с учётом reduced motion, встроенные и собственные обои.
-- История SQLite, автоматическое сохранение прямых фактов, «Запомни: …», редактируемая память и поиск по архиву.
-- Настройки фильтров веб-собеседника: без дополнительных фильтров, умеренный, строгий, свой; общие и на модель.
-- Модели и личные данные не входят в установщики. Никакая модель не скачивается без выбора пользователя.
+## Скачать и запустить
+
+<p align="center">
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/DedsecAI-Studio-0.4.1-Setup.exe"><img src="assets/readme/windows.svg" width="240" alt="Скачать Windows EXE" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio-0.4.1-1-any.pkg.tar.zst"><img src="assets/readme/arch.svg" width="240" alt="Скачать пакет Arch Linux" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio_0.4.1_all.deb"><img src="assets/readme/debian.svg" width="240" alt="Скачать пакет Debian или Ubuntu" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.1">Все варианты, ZIP и tar.gz</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/SHA256SUMS">SHA-256</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.1">Что нового в v0.4.1</a>
+</p>
+
+Ранняя версия проекта. EXE не подписан; полная приёмочная установка GUI на Windows/Debian ещё не завершена. Для скачивания движков и весов нужен интернет. Модели и личная переписка в установщики не входят.
+
+<a id="screenshots"></a>
+
+## Внутри Studio
+
+<a href="assets/readme/companion.webp"><img src="assets/readme/companion.webp" width="100%" alt="Собеседник: отдельный список чатов, переписка с кодом и поле ввода" /></a>
+
+<p align="center"><sub>Реальный интерфейс с демонстрационной перепиской. Личные чаты в скриншоты не включены. Нажми на изображение, чтобы открыть его полностью.</sub></p>
+
+<table>
+  <tr>
+    <td width="50%"><a href="assets/readme/dashboard.webp"><img src="assets/readme/dashboard.webp" alt="Панель управления моделями и оборудованием" /></a></td>
+    <td width="50%"><a href="assets/readme/images.webp"><img src="assets/readme/images.webp" alt="Мастерская изображений с каталогом Uncensored-сборок" /></a></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Модели и ресурсы ПК</strong><br /><sub>Контекст, профили, замеры и управление сервером.</sub></td>
+    <td align="center"><strong>Мастерская изображений</strong><br /><sub>Каталог, Hugging Face, компоненты и галерея.</sub></td>
+  </tr>
+</table>
+
+<details>
+<summary><strong>Ещё экраны: память и мобильный вид</strong></summary>
+<br />
+<table>
+  <tr>
+    <td width="72%" valign="top"><a href="assets/readme/memory.webp"><img src="assets/readme/memory.webp" alt="Редактируемая локальная память собеседника" /></a></td>
+    <td width="28%" valign="top"><a href="assets/readme/mobile.webp"><img src="assets/readme/mobile.webp" alt="Собеседник на узком экране" /></a></td>
+  </tr>
+</table>
+</details>
+
+## Одна мастерская — разные задачи
+
+| 💬 Собеседник | 🧠 Личная память |
+| :--- | :--- |
+| История на диске, поиск, независимая прокрутка чатов и сообщений, удаление и восстановление. | Редактируемые факты и предпочтения, доступные моделям между разговорами. |
+| **🧩 Свои модели** | **🎨 Изображения** |
+| GGUF, Hugging Face, свои файлы, квантовки и настраиваемый контекст. | SD Turbo, SDXL, Qwen Image; загрузка, компоненты, генерация и корзина галереи. |
+| **⌨️ Код в терминале** | **📊 Под твой компьютер** |
+| Открытие Pi в выбранной папке проекта и общий профиль модели с веб-чатом. | CPU, RAM, GPU/VRAM, объяснение ограничений и реальные замеры скорости. |
+
+### Что уже есть
+
+- **Два движка:** llama.cpp для текста и vision, stable-diffusion.cpp для генерации изображений.
+- **Контроль памяти:** видно, какой движок работает и какая модель загружена; есть отдельные кнопки выгрузки.
+- **Удобные загрузки:** «Мои модели», «Каталог» и Hugging Face. Можно только скачать или скачать и запустить.
+- **Qwen Image 2.1:** совместимые энкодер и VAE подключаются автоматически.
+- **Свой стиль:** терминальное оформление, анимации, обои и режим уменьшенного движения.
+- **Локальные данные:** история, вложения, галерея и факты хранятся на компьютере.
+
+В каталоге есть сборки с меткой **Uncensored**. Это обозначение автора весов, а не гарантия поведения или универсальной совместимости. Vision анализирует картинки в чате; генерация изображений находится в отдельной мастерской.
+
+<a id="installation"></a>
+
+## Начать за несколько минут
+
+| Система | Что делать |
+| :--- | :--- |
+| **Windows** | Запусти [EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/DedsecAI-Studio-0.4.1-Setup.exe), выбери компоненты и открой Studio из меню Пуск. |
+| **Arch Linux** | Установи [пакет](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio-0.4.1-1-any.pkg.tar.zst) через `sudo pacman -U ./dedsecai-studio-0.4.1-1-any.pkg.tar.zst`. |
+| **Debian / Ubuntu** | Установи [DEB](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio_0.4.1_all.deb) через `sudo apt install ./dedsecai-studio_0.4.1_all.deb`. |
+
+После установки открой Studio → настрой движок → выбери модель. В нативных Linux-пакетах движки и Pi устанавливаются из раздела **«Система»**; скриптовые установщики могут настроить их сразу.
+
+**Адрес панели:** `http://127.0.0.1:1236` · **CLI:** `dedsecai web`
+
+<details>
+<summary><strong>Запуск из исходников</strong></summary>
+
+```bash
+git clone https://github.com/Dedseckms/DedsecAI-Studio.git
+cd DedsecAI-Studio
+python3 cli.py init
+python3 cli.py web
+```
+
+Нужен Python 3.10+. Движок, Pi и веса настраиваются отдельно через интерфейс. На Windows команда Python может называться `python`.
+</details>
+
+<a id="guide"></a>
+
+## Руководство и подробности
+
+<details>
+<summary><strong>Открыть полное руководство: установка, модели, память, фильтры и сборка</strong></summary>
 
 ## Установка
 
@@ -138,3 +237,15 @@ Linux: `${XDG_DATA_HOME:-~/.local/share}/dedsecai-studio`; Windows: `%LOCALAPPDA
 Журнал установки: `%LOCALAPPDATA%\DedsecAI Studio\state\windows-setup.log`.
 EXE не подписан Authenticode. Полная установка на настоящей Windows пока не проверена.
 Сборка EXE: `python installers/build-windows.py --makensis /путь/к/makensis` (NSIS 3; при переносимой Linux-сборке задайте NSISDIR).
+
+</details>
+
+## Вместе делаем Studio удобнее
+
+Нашёл ошибку или придумал улучшение? [Создай issue](https://github.com/Dedseckms/DedsecAI-Studio/issues/new/choose). Хочешь помочь кодом — начни с [CONTRIBUTING.md](CONTRIBUTING.md).
+
+<p align="center">
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/stargazers">⭐ Поддержать проект звездой</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/latest">↓ Последний релиз</a> · <a href="LICENSE">MIT</a> · <a href="NOTICE.md">Сторонние компоненты</a>
+</p>
+
+<p align="center"><sub>Сделано для локальной работы. Модели выбираешь ты.</sub></p>

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Скачать Studio
+    url: https://github.com/Dedseckms/DedsecAI-Studio/releases/latest
+    about: Установщики Windows, Arch Linux и Debian/Ubuntu.
+  - name: Руководство
+    url: https://github.com/Dedseckms/DedsecAI-Studio#guide
+    about: Установка, движки, контекст, изображения и память.

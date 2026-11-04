@@ -1,0 +1,39 @@
+name: Ошибка в Studio
+description: Сообщить об ошибке и указать систему, модель и шаги воспроизведения.
+title: "[Bug] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Версия Studio
+      placeholder: Например, 0.4.1
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Операционная система
+      options:
+        - Windows
+        - Arch Linux / производная
+        - Debian / Ubuntu / производная
+        - Другая
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Компьютер и модель
+      description: GPU и VRAM, объём RAM, название модели и квантовка.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как повторить
+      description: Что открыл, на что нажал и что ожидал увидеть?
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Ошибка или скриншот
+      description: Приложи текст ошибки или скриншот. Личные переписки и ключи публиковать не нужно.

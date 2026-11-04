@@ -1,0 +1,16 @@
+name: Идея для Studio
+description: Предложить улучшение или новую возможность.
+title: "[Idea] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую задачу хочется решить?
+      description: Опиши реальный сценарий и что сейчас неудобно.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Как это должно работать?
+      description: Можно приложить пример или эскиз.
