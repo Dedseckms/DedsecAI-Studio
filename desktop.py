@@ -26,21 +26,32 @@ def choose(kind='directory',initial=None):
     except (ImportError,RuntimeError) as exc:raise ValueError('Диалог недоступен. Укажите полный путь вручную; на Linux можно установить python3-tk / tk.') from exc
 
 def pi_available():
-    return bool(shutil.which('pi') or (HOME/'.local/bin/pi').exists() or (APP_HOME/'pi/node_modules/@earendil-works/pi-coding-agent/dist/cli.js').exists())
+    return bool(shutil.which('pi') or (HOME/'.local/bin/pi').exists() or (HOME/'.pi/agent/bin/pi-launcher.js').exists() or (APP_HOME/'pi/node_modules/@earendil-works/pi-coding-agent/dist/cli.js').exists())
 
 def pi_command():
     package=APP_HOME/'pi/node_modules/@earendil-works/pi-coding-agent/dist/cli.js'
     if package.exists():
         node=read_json(CONFIG/'node.json',{}).get('executable')
+        if not node or not Path(node).is_file():node=shutil.which('node')
         if not node:raise ValueError('Node.js для Pi не настроен.')
         return [node,str(package)]
     executable=shutil.which('pi')
+    if os.name=='nt':
+        # Managed Pi and npm installations expose JS beside their Windows shims.
+        roots=[Path(executable).parent] if executable else []
+        roots.append(HOME/'.pi/agent/bin')
+        node=shutil.which('node') or read_json(CONFIG/'node.json',{}).get('executable')
+        for root in roots:
+            for entry in (root/'pi-launcher.js',root/'node_modules/@earendil-works/pi-coding-agent/dist/cli.js'):
+                if node and entry.is_file():return [node,str(entry)]
     if not executable and (HOME/'.local/bin/pi').exists():executable=str(HOME/'.local/bin/pi')
     if not executable:raise ValueError('Pi не установлен. Установите его в разделе «Система».')
     return [executable]
 
 def launch_pi(path):
-    args=[sys.executable,str(ROOT/'cli.py'),'pi','--project',str(path)]
+    python=Path(sys.executable)
+    if os.name=='nt' and python.name.lower()=='pythonw.exe':python=python.with_name('python.exe')
+    args=[str(python),str(ROOT/'cli.py'),'pi','--project',str(path)]
     if os.name=='nt':
         # CreateProcess receives an argument list; never interpolate the project into PowerShell.
         subprocess.Popen(args,cwd=path,creationflags=subprocess.CREATE_NEW_CONSOLE)

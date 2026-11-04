@@ -70,8 +70,8 @@ function render() {
   $('context').textContent=m?m.ctx.toLocaleString('ru-RU')+' токенов':'—';$('speed').textContent=m?.speed||'—';
   $('speed-note').textContent=m?.speed.includes('ЗАМЕР')?'Результат короткого запроса на твоём ПК':'Предварительная оценка; сделай замер после запуска';
   const g=state.gpu;
-  $('gpu-memory').replaceChildren(document.createTextNode(g?(g.used/1024).toFixed(1)+' ГБ ':'— '),node('small','',g?'/ '+(g.total/1024).toFixed(0)+' ГБ':''));
-  $('gpu-bar').value=g?g.used/g.total*100:0;$('gpu-name').textContent=g?g.name+(g.temp==null?'':' · '+g.temp+' °C'):'Дискретная VRAM не обнаружена — доступен CPU';$('gpu-load').textContent=g?g.load+'% нагрузки':'';
+  $('gpu-memory').replaceChildren(document.createTextNode(g?(g.used==null?'—':(g.used/1024).toFixed(1))+' ГБ ':'— '),node('small','',g?'/ '+(g.total/1024).toFixed(0)+' ГБ':''));
+  $('gpu-bar').value=g&&g.used!=null?g.used/g.total*100:0;$('gpu-name').textContent=g?g.name+(g.temp==null?'':' · '+g.temp+' °C'):'Дискретная VRAM не обнаружена — доступен CPU';$('gpu-load').textContent=g&&g.load!=null?g.load+'% нагрузки':'';
   $('server-log').textContent=state.server_log||'Сервер ещё не записал журнал.';
   renderModels();renderProjects();renderJob();disableActions();window.dispatchEvent(new Event("dedsecai-state"));
 }

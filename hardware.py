@@ -50,8 +50,15 @@ def detect(refresh=False):
     for line in nv.splitlines():
         try:
             name,vram,free,load,temp=[x.strip() for x in line.split(',')]
-            gpus.append(dict(name=name,vendor='NVIDIA',vram_bytes=int(vram)*1024**2,free_bytes=int(free)*1024**2,load=int(load),temp=int(temp),dedicated=True))
+            def optional(value):
+                try:return float(value)
+                except ValueError:return None
+            gpus.append(dict(name=name,vendor='NVIDIA',vram_bytes=int(float(vram)*1024**2),free_bytes=int(float(free)*1024**2),load=optional(load),temp=optional(temp),dedicated=True))
         except ValueError:pass
+    if os.name=='nt':
+        from windows_gpu import adapters
+        for gpu in adapters():
+            if not any(g['name'].casefold()==gpu['name'].casefold() for g in gpus):gpus.append(gpu)
     if not gpus and os.name!='nt':
         for p in Path('/sys/class/drm').glob('card[0-9]*/device'):
             try:

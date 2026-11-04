@@ -14,6 +14,7 @@ sys.path.insert(0,str(SOURCE))
 from common import APP_HOME,HOME,STATE,VERSION,write_json
 
 FILES=['common.py','hardware.py','hub.py','gguf.py','runtime.py','manager.py','moderation.py','desktop.py','bootstrap.py','cli.py','server.py','worker.py','companion.py','imaging.py','resources.py','image_hub.py','build.py','README.md','LICENSE','NOTICE.md']
+FILES.append('windows_gpu.py')
 DIRS=['assets','static','pi-extensions','installers','packaging']
 
 def quote(value):return '"'+str(value).replace('\\','\\\\').replace('"','\\"').replace('%','%%')+'"'

@@ -121,7 +121,7 @@ def _submit(action,data):
 
 def status():
     hw=hardware.detect();gpu=next((g for g in hw['gpus'] if g['vram_bytes']),None)
-    gpu_view=dict(name=gpu['name'],used=(gpu['vram_bytes']-gpu['free_bytes'])//1024**2,total=gpu['vram_bytes']//1024**2,load=gpu['load'],temp=gpu['temp']) if gpu else None
+    gpu_view=dict(name=gpu['name'],used=(gpu['vram_bytes']-gpu['free_bytes'])//1024**2 if gpu['free_bytes'] is not None else None,total=gpu['vram_bytes']//1024**2,load=gpu['load'],temp=gpu['temp']) if gpu else None
     rows=[]
     for item in manager.catalog():
         rows.append(dict(id=item['id'],name=item['name'],family=item.get('family','Custom'),installed=manager.installed(item),ctx=item['ctx'],
