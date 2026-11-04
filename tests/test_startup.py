@@ -14,7 +14,7 @@ import urllib.request
 
 class StartupTests(unittest.TestCase):
     def test_panel_starts_and_serves_hardware_without_models(self):
-        root=Path(__file__).resolve().parents[1]
+        root=Path(os.environ.get('DEDSECAI_TEST_APP',Path(__file__).resolve().parents[1]))
         with tempfile.TemporaryDirectory() as folder:
             with socket.socket() as sock:
                 sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]

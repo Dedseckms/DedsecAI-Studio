@@ -1,0 +1,83 @@
+name: Release
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEDSECAI_HOME: ${{ github.workspace }}/.dedsecai-test-data
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Verify tag and version
+        run: python -c "import build, os; ref=os.environ['GITHUB_REF']; assert not ref.startswith('refs/tags/') or os.environ['GITHUB_REF_NAME'] == 'v'+build.VERSION"
+      - name: Test Ubuntu and actual panel startup
+        run: python -m unittest discover -s tests -v
+      - name: Install build tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y nsis
+          python -m pip install zstandard==0.25.0
+      - name: Build six packages and checksums
+        run: python build_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-packages
+          path: dist/*
+  windows-install:
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      DEDSECAI_HOME: ${{ runner.temp }}/studio-install-test
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-packages
+          path: dist
+      - name: Windows tests
+        run: python -m unittest discover -s tests -v
+      - name: Install actual EXE
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem dist -Filter '*-Setup.exe')
+          if ($installers.Count -ne 1) { throw 'Expected exactly one EXE' }
+          $exe = $installers[0]
+          $setup = Start-Process -FilePath $exe.FullName -ArgumentList '/S','/APPONLY' -WindowStyle Hidden -PassThru -Wait
+          if ($setup.ExitCode -ne 0) { throw "Installer failed: $($setup.ExitCode)" }
+          if (!(Test-Path "$env:DEDSECAI_HOME/app/cli.py")) { throw 'Installed entry point missing' }
+          if (!(Test-Path "$env:DEDSECAI_HOME/app/installers/artwork/studio.ico")) { throw 'Windows icon missing' }
+      - name: Start installed panel
+        shell: pwsh
+        run: |
+          $env:DEDSECAI_TEST_APP = "$env:DEDSECAI_HOME/app"
+          python -m unittest discover -s tests -p test_startup.py -v
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build, windows-install]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-packages
+          path: dist
+      - name: Publish in the established Studio release format
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cd dist
+          gh release create "$GITHUB_REF_NAME" --title "DedsecAI Studio $GITHUB_REF_NAME — локальная AI-мастерская" --notes-file release-notes.md --latest *-Setup.exe *-windows.zip *-arch.tar.gz *-debian.tar.gz *.pkg.tar.zst *.deb SHA256SUMS manifest.json

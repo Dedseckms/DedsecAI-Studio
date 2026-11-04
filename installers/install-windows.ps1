@@ -4,6 +4,7 @@ $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
 $StudioSource=Split-Path -Parent $PSScriptRoot
 $StudioHome=Join-Path $env:LOCALAPPDATA 'DedsecAI Studio'
+if($env:DEDSECAI_HOME){$StudioHome=[IO.Path]::GetFullPath($env:DEDSECAI_HOME)}
 $StateDir=Join-Path $StudioHome 'state'
 New-Item -ItemType Directory -Force -Path $StateDir | Out-Null
 $TranscriptStarted=$false

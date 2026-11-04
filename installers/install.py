@@ -20,8 +20,8 @@ DIRS=['assets','static','pi-extensions','installers','packaging']
 def quote(value):return '"'+str(value).replace('\\','\\\\').replace('"','\\"').replace('%','%%')+'"'
 
 def shortcut(path,python,entry,argument):
-    script='$s=New-Object -ComObject WScript.Shell; $l=$s.CreateShortcut($env:DS_SHORTCUT); $l.TargetPath=$env:DS_PYTHON; $l.Arguments=$env:DS_ARGS; $l.WorkingDirectory=$env:DS_WORKDIR; $l.Description="DedsecAI Studio"; $l.Save()'
-    env=dict(os.environ,DS_SHORTCUT=str(path),DS_PYTHON=str(python),DS_ARGS='"'+str(entry)+'" '+argument,DS_WORKDIR=str(entry.parent))
+    script='$s=New-Object -ComObject WScript.Shell; $l=$s.CreateShortcut($env:DS_SHORTCUT); $l.TargetPath=$env:DS_PYTHON; $l.Arguments=$env:DS_ARGS; $l.WorkingDirectory=$env:DS_WORKDIR; $l.Description="DedsecAI Studio"; $l.IconLocation=$env:DS_ICON; $l.Save()'
+    env=dict(os.environ,DS_SHORTCUT=str(path),DS_PYTHON=str(python),DS_ARGS='"'+str(entry)+'" '+argument,DS_WORKDIR=str(entry.parent),DS_ICON=str(entry.parent/'installers/artwork/studio.ico')+',0')
     path.parent.mkdir(parents=True,exist_ok=True)
     subprocess.run(['powershell','-NoProfile','-Command',script],env=env,check=True)
 
@@ -32,6 +32,9 @@ def main():
         print(json.dumps({'destination':str(dest),'files':FILES,'directories':DIRS,'runtime':not args.skip_runtime,'pi':not args.skip_pi,'autostart':not args.no_autostart,'models_downloaded':False},indent=2));return
     if os.name!='nt' and hasattr(os,'geteuid') and os.geteuid()==0:raise ValueError('Запустите установщик от обычного пользователя. sudo нужен только менеджеру системных пакетов.')
     if SOURCE.resolve()!=dest.resolve():
+        if os.name=='nt' and dest.exists():
+            script='$entries=@($env:DS_PANEL,$env:DS_ENTRY); Get-CimInstance Win32_Process -Filter "Name = \'python.exe\' OR Name = \'pythonw.exe\'" | ForEach-Object { $p=$_; if($p.ProcessId -ne [int]$env:DS_INSTALL_PID -and $p.CommandLine -and (($p.CommandLine.IndexOf($entries[0],[StringComparison]::OrdinalIgnoreCase) -ge 0) -or ($p.CommandLine.IndexOf($entries[1],[StringComparison]::OrdinalIgnoreCase) -ge 0 -and $p.CommandLine -match "\\sserve(\\s|$)"))) { Stop-Process -Id $p.ProcessId -ErrorAction Stop } }'
+            subprocess.run(['powershell','-NoProfile','-Command',script],env=dict(os.environ,DS_PANEL=str(dest/'server.py'),DS_ENTRY=str(dest/'cli.py'),DS_INSTALL_PID=str(os.getpid())),check=True)
         if dest.exists():shutil.copytree(dest,APP_HOME/'backups'/('app-'+str(int(time.time()))),dirs_exist_ok=True)
         dest.mkdir(parents=True,exist_ok=True)
         for name in FILES:
@@ -49,6 +52,9 @@ def main():
         if not gui.exists():gui=python
         programs=Path(os.environ['APPDATA'])/'Microsoft/Windows/Start Menu/Programs'
         shortcut(programs/'DedsecAI Studio.lnk',gui,entry,'web')
+        desktop_script='[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; [Environment]::GetFolderPath("Desktop")'
+        desktop_dir=subprocess.check_output(['powershell','-NoProfile','-Command',desktop_script],text=True,encoding='utf-8').strip()
+        if desktop_dir:shortcut(Path(desktop_dir)/'DedsecAI Studio.lnk',gui,entry,'web')
         if not args.no_autostart:shortcut(programs/'Startup/DedsecAI Studio.lnk',gui,entry,'serve')
         launcher=APP_HOME/'DedsecAI Studio.cmd'
         launcher.write_text('@echo off\r\n"'+str(python)+'" "'+str(entry)+'" web\r\n',encoding='utf-8')

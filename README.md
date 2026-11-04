@@ -29,13 +29,13 @@
 ## Скачать и запустить
 
 <p align="center">
-  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/DedsecAI-Studio-0.4.1-Setup.exe"><img src="assets/readme/windows.svg" width="240" alt="Скачать Windows EXE" /></a>
-  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio-0.4.1-1-any.pkg.tar.zst"><img src="assets/readme/arch.svg" width="240" alt="Скачать пакет Arch Linux" /></a>
-  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio_0.4.1_all.deb"><img src="assets/readme/debian.svg" width="240" alt="Скачать пакет Debian или Ubuntu" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.2/DedsecAI-Studio-0.4.2-Setup.exe"><img src="assets/readme/windows.svg" width="240" alt="Скачать Windows EXE" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.2/dedsecai-studio-0.4.2-1-any.pkg.tar.zst"><img src="assets/readme/arch.svg" width="240" alt="Скачать пакет Arch Linux" /></a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.2/dedsecai-studio_0.4.2_all.deb"><img src="assets/readme/debian.svg" width="240" alt="Скачать пакет Debian или Ubuntu" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.1">Все варианты, ZIP и tar.gz</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/SHA256SUMS">SHA-256</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.1">Что нового в v0.4.1</a>
+  <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.2">Все варианты, ZIP и tar.gz</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.2/SHA256SUMS">SHA-256</a> · <a href="https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.2">Что нового в v0.4.2</a>
 </p>
 
 Ранняя версия проекта. EXE не подписан; полная приёмочная установка GUI на Windows/Debian ещё не завершена. Для скачивания движков и весов нужен интернет. Модели и личная переписка в установщики не входят.
@@ -97,9 +97,9 @@
 
 | Система | Что делать |
 | :--- | :--- |
-| **Windows** | Запусти [EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/DedsecAI-Studio-0.4.1-Setup.exe), выбери компоненты и открой Studio из меню Пуск. |
-| **Arch Linux** | Установи [пакет](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio-0.4.1-1-any.pkg.tar.zst) через `sudo pacman -U ./dedsecai-studio-0.4.1-1-any.pkg.tar.zst`. |
-| **Debian / Ubuntu** | Установи [DEB](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio_0.4.1_all.deb) через `sudo apt install ./dedsecai-studio_0.4.1_all.deb`. |
+| **Windows** | Запусти [EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.2/DedsecAI-Studio-0.4.2-Setup.exe), выбери компоненты и открой Studio из меню Пуск. |
+| **Arch Linux** | Установи [пакет](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.2/dedsecai-studio-0.4.2-1-any.pkg.tar.zst) через `sudo pacman -U ./dedsecai-studio-0.4.2-1-any.pkg.tar.zst`. |
+| **Debian / Ubuntu** | Установи [DEB](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.2/dedsecai-studio_0.4.2_all.deb) через `sudo apt install ./dedsecai-studio_0.4.2_all.deb`. |
 
 После установки открой Studio → настрой движок → выбери модель. В нативных Linux-пакетах движки и Pi устанавливаются из раздела **«Система»**; скриптовые установщики могут настроить их сразу.
 
@@ -129,7 +129,7 @@ python3 cli.py web
 
 ### Windows
 
-Запустите `DedsecAI-Studio-0.4.1-Setup.exe` — мастер установки с выбором llama.cpp, Pi и автозапуска. Альтернатива: распакуйте Windows ZIP и запустите `installers\install-windows.cmd`.
+Запустите `DedsecAI-Studio-0.4.2-Setup.exe` — мастер установки с выбором llama.cpp, Pi и автозапуска. Альтернатива: распакуйте Windows ZIP и запустите `installers\install-windows.cmd`.
 Нужен Python 3.10+ с Tcl/Tk. При отсутствии подходящего Python/Tk/FTS5 установщик скачивает официальный Python 3.14.10, проверяет SHA-256 и Authenticode издателя и устанавливает его для текущего пользователя. winget не требуется.
 Устанавливается готовый Vulkan runtime llama.cpp (либо CPU: PowerShell `-Backend cpu`), затем Pi и Node.js при необходимости.
 В меню Пуск появляется DedsecAI Studio, сервер панели запускается при входе. Для отключения: `-NoAutostart`.
@@ -145,7 +145,7 @@ Windows CUDA: укажите собственный проверенный llama
 ### Debian / Ubuntu
 
 Распакуйте Debian архив: `bash installers/install-debian.sh`.
-Либо установите DEB: `sudo apt install ./dedsecai-studio_0.4.1_all.deb` и откройте приложение из меню.
+Либо установите DEB: `sudo apt install ./dedsecai-studio_0.4.2_all.deb` и откройте приложение из меню.
 DEB ставит приложение; runtime/Pi настраиваются кнопками в разделе «Система».
 Скриптовый установщик ставит зависимости и настраивает runtime/Pi сразу.
 Сборка llama.cpp из исходников использует glibc целевой системы — архив Ubuntu runtime не подставляется в старый Debian.

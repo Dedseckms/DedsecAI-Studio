@@ -12,7 +12,7 @@ for stream in (sys.stdout,sys.stderr):
 import zipfile
 
 ROOT=Path(__file__).resolve().parent
-VERSION='0.4.1'
+VERSION='0.4.2'
 FILES=['common.py','hardware.py','hub.py','gguf.py','runtime.py','manager.py','moderation.py','desktop.py','bootstrap.py','cli.py','server.py','worker.py','companion.py','imaging.py','resources.py','image_hub.py','build.py','README.md','LICENSE','NOTICE.md']
 FILES.append('windows_gpu.py')
 DIRS=['assets','static','pi-extensions','installers','packaging']
