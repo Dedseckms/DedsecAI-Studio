@@ -1,8 +1,8 @@
 <p align="center"><img src="static/brand.svg" width="110" alt="DedsecAI Studio: двоичная D"></p>
 
-# DedsecAI Studio 0.4.0
+# DedsecAI Studio 0.4.1
 
-**Скачать установщик:** [Windows EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.0/DedsecAI-Studio-0.4.0-Setup.exe) · [Arch Linux](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.0/dedsecai-studio-0.4.0-1-any.pkg.tar.zst) · [Debian/Ubuntu](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.0/dedsecai-studio_0.4.0_all.deb) · [Все файлы и SHA-256](https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.0).
+**Скачать установщик:** [Windows EXE](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/DedsecAI-Studio-0.4.1-Setup.exe) · [Arch Linux](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio-0.4.1-1-any.pkg.tar.zst) · [Debian/Ubuntu](https://github.com/Dedseckms/DedsecAI-Studio/releases/download/v0.4.1/dedsecai-studio_0.4.1_all.deb) · [Все файлы и SHA-256](https://github.com/Dedseckms/DedsecAI-Studio/releases/tag/v0.4.1).
 
 Предварительный релиз. Windows EXE собран и проверен на целостность; полная установка на Windows/Debian ещё требует приёмочной проверки. EXE не подписан. Для установки runtime/Pi нужен интернет; веса моделей скачиваются отдельно.
 
@@ -30,7 +30,7 @@ Python 3.10+, Windows 10/11, Arch Linux и Debian/Ubuntu. Интерфейс: ht
 
 ### Windows
 
-Запустите `DedsecAI-Studio-0.4.0-Setup.exe` — мастер установки с выбором llama.cpp, Pi и автозапуска. Альтернатива: распакуйте Windows ZIP и запустите `installers\install-windows.cmd`.
+Запустите `DedsecAI-Studio-0.4.1-Setup.exe` — мастер установки с выбором llama.cpp, Pi и автозапуска. Альтернатива: распакуйте Windows ZIP и запустите `installers\install-windows.cmd`.
 Нужен Python 3.10+ с Tcl/Tk. При отсутствии подходящего Python/Tk/FTS5 установщик скачивает официальный Python 3.14.10, проверяет SHA-256 и Authenticode издателя и устанавливает его для текущего пользователя. winget не требуется.
 Устанавливается готовый Vulkan runtime llama.cpp (либо CPU: PowerShell `-Backend cpu`), затем Pi и Node.js при необходимости.
 В меню Пуск появляется DedsecAI Studio, сервер панели запускается при входе. Для отключения: `-NoAutostart`.
@@ -46,7 +46,7 @@ Windows CUDA: укажите собственный проверенный llama
 ### Debian / Ubuntu
 
 Распакуйте Debian архив: `bash installers/install-debian.sh`.
-Либо установите DEB: `sudo apt install ./dedsecai-studio_0.4.0_all.deb` и откройте приложение из меню.
+Либо установите DEB: `sudo apt install ./dedsecai-studio_0.4.1_all.deb` и откройте приложение из меню.
 DEB ставит приложение; runtime/Pi настраиваются кнопками в разделе «Система».
 Скриптовый установщик ставит зависимости и настраивает runtime/Pi сразу.
 Сборка llama.cpp из исходников использует glibc целевой системы — архив Ubuntu runtime не подставляется в старый Debian.
@@ -71,6 +71,11 @@ Kimi K2 — сотни ГиБ весов. MoE active parameters не замен�
 У каждого GGUF своя лицензия и требования к версии llama.cpp. Каталог подтверждает наличие файлов, а не качество всех моделей.
 Для закрытых Hugging Face репозиториев задайте `HF_TOKEN` и примите условия в источнике.
 Для текстовых и vision-моделей нужен GGUF. Для генерации stable-diffusion.cpp принимает совместимые GGUF/safetensors/ckpt и отдельные энкодеры/VAE по рецепту. Один diffusion GGUF обычно не включает все компоненты.
+
+## Чаты собеседника
+
+Переписка и список чатов прокручиваются независимо в пределах окна; поле ввода остаётся снизу. На узком экране список открывается кнопкой «Чаты». Обновление ответа сохраняет позицию чтения, когда вы прокрутили историю вверх.
+У чата есть кнопка «×» для удаления с подтверждением. Чат перемещается в корзину, скрывается из истории и поиска и может быть восстановлен вместе с вложениями. Отдельно сохранённые записи «Памяти» остаются доступными. Перед удалением чата с текущим ответом нужно остановить генерацию.
 
 ## Мастерская изображений и GPU
 

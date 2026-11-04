@@ -163,6 +163,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if path=='/api/state':self.respond(200,status())
             elif path=='/api/chat':self.respond(200,companion.overview(query.get('id',[None])[0]))
+            elif path=='/api/chat/trash':self.respond(200,{'conversations':companion.trashed_conversations()})
             elif path=='/api/chat/search':self.respond(200,{'results':companion.search(query.get('q',[''])[0])})
             elif path.startswith('/api/attachment/'):
                 mime,raw=companion.attachment(path.rsplit('/',1)[1]);self.respond(200,raw,mime)
@@ -215,6 +216,9 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(data,dict):raise ValueError('Ожидается объект JSON.')
             if self.path=='/api/chat/new':self.respond(200,companion.create())
             elif self.path=='/api/chat/send':self.respond(202,{'job':submit('chat',data)})
+            elif self.path=='/api/chat/delete':
+                with submit_lock:self.respond(200,companion.remove_conversation(data.get('id')))
+            elif self.path=='/api/chat/restore':self.respond(200,companion.restore_conversation(data.get('id')))
             elif self.path=='/api/chat/stop':chat_engine.cancel();self.respond(200,{'stopping':True})
             elif self.path=='/api/images/delete':
                 import imaging

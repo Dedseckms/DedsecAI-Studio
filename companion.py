@@ -55,6 +55,8 @@ def init(recover=False):
         if 'memory_key' not in columns:con.execute('ALTER TABLE memories ADD COLUMN memory_key TEXT')
         if 'automatic' not in columns:con.execute('ALTER TABLE memories ADD COLUMN automatic INTEGER NOT NULL DEFAULT 0')
         con.execute('CREATE TABLE IF NOT EXISTS memory_history(id INTEGER PRIMARY KEY,memory_id INTEGER,content TEXT,changed TEXT)')
+        chat_columns={r[1] for r in con.execute('PRAGMA table_info(conversations)')}
+        if 'deleted_at' not in chat_columns:con.execute('ALTER TABLE conversations ADD COLUMN deleted_at TEXT')
         # Interrupted responses remain visible, but never become conversational context.
         if recover:con.execute("UPDATE messages SET status='interrupted' WHERE status='generating'")
     DB_PATH.chmod(0o600)
@@ -64,7 +66,7 @@ def conversation(ident):
     if not isinstance(ident,str) or not re.fullmatch('[a-f0-9]{32}',ident):
         raise ValueError('Выберите разговор.')
     with db() as con:
-        row=con.execute('SELECT * FROM conversations WHERE id=?',(ident,)).fetchone()
+        row=con.execute('SELECT * FROM conversations WHERE id=? AND deleted_at IS NULL',(ident,)).fetchone()
         if row is None:raise ValueError('Разговор не найден.')
         return dict(row)
 
@@ -72,13 +74,13 @@ def conversation(ident):
 def create():
     ident=secrets.token_hex(16);date=now()
     with db() as con:
-        con.execute('INSERT INTO conversations VALUES(?,?,?,?)',(ident,'Новый разговор',date,date))
+        con.execute('INSERT INTO conversations(id,title,created,updated) VALUES(?,?,?,?)',(ident,'Новый разговор',date,date))
     return conversation(ident)
 
 
 def overview(ident=None):
     with db() as con:
-        rows=[dict(r) for r in con.execute('SELECT * FROM conversations ORDER BY updated DESC LIMIT 100')]
+        rows=[dict(r) for r in con.execute('SELECT * FROM conversations WHERE deleted_at IS NULL ORDER BY updated DESC LIMIT 100')]
         messages=[]
         if ident:
             conversation(ident)
@@ -118,7 +120,7 @@ def search(query,before=None,limit=6,exclude=None):
         rows=con.execute('''SELECT m.id,m.conversation,m.role,m.content,m.created,c.title
         FROM message_search JOIN messages m ON m.id=message_search.rowid
         JOIN conversations c ON c.id=m.conversation
-        WHERE message_search MATCH ? AND m.status='done' AND m.id<?
+        WHERE message_search MATCH ? AND m.status='done' AND c.deleted_at IS NULL AND m.id<?
         ORDER BY bm25(message_search) LIMIT ?''',(match,before or 2**63-1,limit+len(exclude or []))).fetchall()
     return [dict(r,content=r['content'][:1200]) for r in rows if r['id'] not in set(exclude or [])][:limit]
 
@@ -308,3 +310,23 @@ def auto_remember(text,source):
                 con.execute('INSERT INTO memory_history(memory_id,content,changed) SELECT id,content,? FROM memories WHERE id=?',(now(),old['id']))
                 con.execute('UPDATE memories SET content=?,updated=?,source_message=? WHERE id=?',(fact,now(),source,old['id']))
             else:con.execute('INSERT INTO memories(content,created,updated,source_message,memory_key,automatic) VALUES(?,?,?,?,?,1)',(fact,now(),now(),source,key))
+
+
+def remove_conversation(ident):
+    conversation(ident)
+    with db() as con:
+        if con.execute("SELECT 1 FROM messages WHERE conversation=? AND status='generating'",(ident,)).fetchone():
+            raise BlockingIOError('Сначала остановите ответ в этом чате, затем удалите его.')
+        con.execute('UPDATE conversations SET deleted_at=? WHERE id=? AND deleted_at IS NULL',(now(),ident))
+    return {'id':ident,'message':'Чат перемещён в корзину.'}
+
+
+def trashed_conversations():
+    with db() as con:return [dict(r) for r in con.execute('SELECT id,title,deleted_at FROM conversations WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC')]
+
+
+def restore_conversation(ident):
+    if not isinstance(ident,str) or not re.fullmatch('[a-f0-9]{32}',ident):raise ValueError('Выберите чат.')
+    with db() as con:
+        if not con.execute('UPDATE conversations SET deleted_at=NULL WHERE id=? AND deleted_at IS NOT NULL',(ident,)).rowcount:raise ValueError('Чат в корзине не найден.')
+    return {'id':ident,'message':'Чат восстановлен.'}
