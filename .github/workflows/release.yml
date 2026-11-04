@@ -36,7 +36,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 15
     env:
-      DEDSECAI_HOME: ${{ runner.temp }}/studio-install-test
+      DEDSECAI_HOME: ${{ github.workspace }}/.dedsecai-test-data/install-test
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
